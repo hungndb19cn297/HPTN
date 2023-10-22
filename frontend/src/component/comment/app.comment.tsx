@@ -20,7 +20,7 @@ export default function Comment({ comment }: {
     return (
         <Card style={{ marginTop: 20, backgroundColor: 'hsl(0deg 0% 100%)', color: '#0a0a0a', border: 'none' }}>
             <Row >
-                <Col style={{ flex: 1, paddingRight: 0, display: 'block' }}>
+                {/* <Col style={{ flex: 1, paddingRight: 0, display: 'block' }}>
                     <div style={{ padding: '10px 0px 10px 10px' }}>
                         <div>
                             <div style={{ border: '1px solid #000', borderRadius: 8, display: 'inline-block', textAlign: 'center' }}>
@@ -30,7 +30,7 @@ export default function Comment({ comment }: {
                             </div>
                         </div>
                     </div>
-                </Col>
+                </Col> */}
                 <Col style={{ display: !comment.parentId ? 'none' : 'block' }}>
                     <div style={{ height: '100%', width: 10, backgroundColor: '#ccc' }}></div>
                 </Col>

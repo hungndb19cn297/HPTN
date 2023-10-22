@@ -5,6 +5,8 @@ public class ErrorMessage {
     public static final String USER_EXISTED = "USER_EXISTED";
     public static final String USER_NOT_FOUND = "USER_NOT_FOUND";
     public static final String INVALID_ID = "INVALID_ID";
+    public static final String INVALID_POST = "INVALID_POST";
+    public static final String INVALID_COMMENT = "INVALID_COMMENT";
     public static final String INVALID_TAG_ID = "INVALID_TAG_ID";
     public static final String INVALID_TOKEN = "INVALID_TOKEN";
     public static final String INVALID_ENUM = "INVALID_ENUM";

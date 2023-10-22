@@ -2,6 +2,7 @@ package com.example.authentication.dto.post;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
@@ -18,6 +19,7 @@ public class CreatePostDto {
     @Length(max = 20000)
     @NotBlank
     private String content;
+    @NotNull
     private Set<Integer> tagIds;
 }
 

@@ -44,10 +44,10 @@ function Header() {
                 className={path === "/" ? "nav-link active" : "nav-link"}
                 style={{ color: "#fff", marginLeft: 10 }}
               >
-                Hỏi & Đáp
+                Chia sẻ kiến thức
               </Link>
             </Nav.Item>
-            <Nav.Item>
+            {/* <Nav.Item>
               <Link
                 href="/post"
                 className={path === "/posts" ? "nav-link active" : "nav-link"}
@@ -55,7 +55,7 @@ function Header() {
               >
                 Chia sẻ kiến thức
               </Link>
-            </Nav.Item>
+            </Nav.Item> */}
             <Nav.Item>
               <Link
                 href="/post/create"
@@ -64,7 +64,7 @@ function Header() {
                 }
                 style={{ color: "#fff", marginLeft: 10 }}
               >
-                Đăng bài || Câu hỏi
+                Đăng bài
               </Link>
             </Nav.Item>
           </Nav>

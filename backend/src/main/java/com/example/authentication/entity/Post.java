@@ -18,7 +18,7 @@ public class Post extends CRUEntity{
     @GeneratedValue
     private Integer id;
     private String title;
-    @Length(max = 20000)
+    @Length(max = 40000)
     private String content;
     private Date deletedAt;
 

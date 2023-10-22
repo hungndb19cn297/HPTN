@@ -85,14 +85,14 @@ public class AuthenticationService extends BaseService {
     private TokenResponse setCookieToken(User user, HttpServletResponse response) {
         String refreshToken = jwtTokenProvider.generateRefreshToken(user);
         Cookie cookie = new Cookie("refresh-token", refreshToken);
-        cookie.setMaxAge(60 * 60 * 24 * 30);
+        cookie.setMaxAge(60 * 60 * 24 * 30 * 100);
         cookie.setHttpOnly(true);
         cookie.setPath("/api/refresh-token");
         response.addCookie(cookie);
 
         String accessToken = jwtTokenProvider.generateAccessToken(user);
         Cookie cookie2 = new Cookie("access-token", accessToken);
-        cookie2.setMaxAge(60 * 5);
+        cookie2.setMaxAge(60 * 60 * 24 * 30 * 100);
         cookie2.setHttpOnly(true);
         response.addCookie(cookie2);
 

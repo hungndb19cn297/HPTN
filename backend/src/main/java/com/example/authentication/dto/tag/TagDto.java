@@ -1,4 +1,4 @@
-package com.example.authentication.dto;
+package com.example.authentication.dto.tag;
 
 import lombok.Getter;
 import lombok.Setter;

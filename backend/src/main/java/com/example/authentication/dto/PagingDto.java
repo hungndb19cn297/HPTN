@@ -12,9 +12,9 @@ public class PagingDto {
     private Integer pageSize;
 
     public void validatePage() {
-        if (pageIndex == null || pageIndex < 0)
+        if (pageIndex == null || pageIndex <= 0)
             pageIndex = 1;
-        if (pageSize == null || pageSize < 0)
+        if (pageSize == null || pageSize < 20)
             pageSize = 20;
         if (pageSize > 50)
             pageSize = 50;

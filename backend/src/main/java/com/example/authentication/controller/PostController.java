@@ -8,6 +8,7 @@ import com.example.authentication.entity.Post;
 import com.example.authentication.security.MyUserDetail;
 import com.example.authentication.service.PostService;
 import com.example.authentication.utils.ConvertUtils;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -22,7 +23,7 @@ public class PostController {
     @Autowired
     private PostService postService;
     @PostMapping
-    public Integer createPost(Authentication authentication, @RequestBody CreatePostDto requestDto){
+    public Integer createPost(Authentication authentication, @RequestBody @Valid CreatePostDto requestDto){
         Integer userId = ((MyUserDetail) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal()).getId();
 
@@ -30,7 +31,7 @@ public class PostController {
     }
 
     @PutMapping
-    public Integer updatePost(Authentication authentication, @RequestBody UpdatePostDto requestDto){
+    public Integer updatePost(Authentication authentication, @RequestBody @Valid UpdatePostDto requestDto){
         Integer userId = ((MyUserDetail) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal()).getId();
         return postService.updatePost(requestDto, userId);

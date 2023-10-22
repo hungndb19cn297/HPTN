@@ -1,6 +1,6 @@
 package com.example.authentication.service;
 
-import com.example.authentication.dto.TagDto;
+import com.example.authentication.dto.tag.TagDto;
 import com.example.authentication.dto.post.*;
 import com.example.authentication.dto.user.UseInfoDto;
 import com.example.authentication.entity.Post;
@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,14 +39,15 @@ public class PostService extends BaseService {
         Post post = postRepository.findById(requestDto.getId()).orElse(null);
         if (post == null)
             throw new ApiException(ErrorMessage.INVALID_ID);
-        if (!Objects.equals(post.getCreatedBy(), userId))
-            throw new ApiException(ErrorMessage.PERMISSION_DENIED);
+//        if (!Objects.equals(post.getCreatedBy(), userId))
+//            throw new ApiException(ErrorMessage.PERMISSION_DENIED);
         List<Integer> tags = tagRepository.getIdExisted(requestDto.getTagIds());
         if (tags.size() != requestDto.getTagIds().size())
             throw new ApiException(ErrorMessage.INVALID_TAG_ID);
         post.setTitle(requestDto.getTitle());
         post.setContent(requestDto.getContent());
         post.getPostTags().clear();
+//        post.setUpdatedBy(userId);
         postRepository.save(post);
         postTagRepository.saveAll(requestDto.getTagIds().stream().map(tagId -> new PostTag(tagId, post)).toList());
         return post.getId();
@@ -61,7 +63,7 @@ public class PostService extends BaseService {
                 requestDto.getIsBookmark(),
                 requestDto.getCreatedBy(),
                 userId,
-                PageRequest.of(requestDto.getPageIndex() - 1, requestDto.getPageSize()));
+                PageRequest.of(requestDto.getPageIndex() - 1, requestDto.getPageSize(), Sort.by("createdAt").descending()));
 
         List<PostResponseDto> postDtos = postPage.toList().stream().map(dto -> {
             PostResponseDto postDto = ConvertUtils.convert(dto, PostResponseDto.class);
