@@ -33,7 +33,7 @@ public class ImageController {
         } catch (IOException e) {
             throw new ApiException(ErrorMessage.INVALID_FILE);
         }
-        return "http://localhost:8080/api/images/pub/" + id;
+        return "https://kuroneko-it.me/api/images/pub/" + id;
     }
 
     @GetMapping("/pub/{id}")

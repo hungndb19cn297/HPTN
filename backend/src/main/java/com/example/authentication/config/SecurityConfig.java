@@ -43,7 +43,22 @@ public class SecurityConfig {
                 .cors(httpSecurityCorsConfigurer -> {
                     httpSecurityCorsConfigurer.configurationSource(request -> {
                         CorsConfiguration configuration = new CorsConfiguration();
-                        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8080", "http://localhost:5500", "http://127.0.0.1:5500"));
+                        configuration.setAllowedOrigins(List.of(
+                                "http://localhost:3000",
+                                "http://localhost:8080",
+                                "http://localhost:5500",
+                                "http://127.0.0.1:5500",
+
+                                "http://20.249.217.4:3000",
+                                "http://20.249.217.4:8080",
+                                "http://20.249.217.4:5500",
+                                "http://20.249.217.4:5500",
+
+                                "http://kuroneko-it.me",
+                                "http://kuroneko-it.me/api",
+                                "https://kuroneko-it.me",
+                                "https://kuroneko-it.me/api"
+                        ));
                         configuration.setAllowCredentials(true);
                         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                         configuration.setAllowedHeaders(List.of("*"));

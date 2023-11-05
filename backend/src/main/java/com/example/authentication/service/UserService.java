@@ -27,4 +27,11 @@ public class UserService extends BaseService {
         responseDto.setTotalPosts(postRepository.countByCreatedBy(userId));
         return responseDto;
     }
+
+    public String setAvatar(Integer userId, String url) {
+        User user = userRepository.findOneById(userId);
+        user.setAvatar(url);
+        userRepository.save(user);
+        return url;
+    }
 }
