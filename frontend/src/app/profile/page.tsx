@@ -21,6 +21,7 @@ const Profile = () => {
   );
   const [user, setUser] = useState(null);
   const [myUserId, setMyUserId] = useState(null);
+  const [avatar, setAvatar] = useState(null);
 
   useEffect(() => {
     setMyUserId(localStorage.getItem("id"));
@@ -28,16 +29,17 @@ const Profile = () => {
       .get("/users/pub?userId=" + userId)
       .then((response: any) => {
         console.log(response);
+        setAvatar(response.avatar)
         setUser(response);
       })
       .catch((error) => console.log(error));
-  }, []);
+  }, [avatar]);
 
   
   return (
     <>
       <Container>
-        <ProfileBasic user={user} myUserId={myUserId} ></ProfileBasic>
+        <ProfileBasic user={user} myUserId={myUserId} setAvatar={setAvatar} ></ProfileBasic>
       </Container>
       <br />
       <br />
