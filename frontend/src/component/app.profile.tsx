@@ -11,14 +11,16 @@ import {
 } from "mdb-react-ui-kit";
 import { Button } from "@mui/material";
 import { Container } from "react-bootstrap";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axiosAuthClient from "@/api/axiosClient";
 
 export default function ProfileBasic(props: any) {
   const user = props.user;
   const myUserId = props.myUserId;
+  const setAvatar = props.setAvatar;
   const [isFollow, setIsFollow] = useState(null);
-  const [totalFollow, setTotalFollow] = useState(null)
+  const [totalFollow, setTotalFollow] = useState(null);
+  const inputFile = useRef(null);
   if (user?.id != myUserId && myUserId != null && user?.id != null) {
     axiosAuthClient
       .get("/follows?toId=" + user?.id)
@@ -29,6 +31,28 @@ export default function ProfileBasic(props: any) {
   }
   return (
     <Container>
+      <input
+        type="file"
+        id="file"
+        ref={inputFile}
+        style={{ display: "none" }}
+        onChange={(file) => {
+          const formData = new FormData();
+          formData.append("file", file.target.files[0]);
+          console.log(formData);
+          const config = {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          };
+          axiosAuthClient
+            .post("/users/avatar", formData, config)
+            .then((response) => {
+              setAvatar(response)
+            })
+            .catch((error) => console.log(error));
+        }}
+      />
       <MDBRow className="justify-content-center">
         <MDBCard style={{ borderRadius: "15px" }}>
           <MDBCardBody className="p-4">
@@ -43,6 +67,9 @@ export default function ProfileBasic(props: any) {
                   src={user?.avatar ?? "logo.jpg"}
                   alt="Generic placeholder image"
                   fluid
+                  onClick={() => {
+                    inputFile.current.click();
+                  }}
                 />
               </div>
               <div className="flex-grow-1 ms-3">
