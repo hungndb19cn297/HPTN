@@ -12,6 +12,9 @@ import java.util.List;
 @Setter
 @Data
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Table(name = "posts")
 public class Post extends CRUEntity{
     @Id

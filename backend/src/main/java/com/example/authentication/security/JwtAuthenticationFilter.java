@@ -57,10 +57,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Locale locale = new Locale(lang);
         LocaleContextHolder.setLocale(locale);
 
-        if (this.ignoredPaths.matches(request)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
         try {
             String jwt = getJwtFromRequest(request);
 
@@ -75,9 +71,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
                 filterChain.doFilter(request, response);
             } else {
+                if (this.ignoredPaths.matches(request)) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
                 resolver.resolveException(request, response, null, new ApiException(ErrorMessage.INVALID_TOKEN));
             }
         } catch (Exception ex) {
+            if (this.ignoredPaths.matches(request)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
             resolver.resolveException(request, response, null, new ApiException(ErrorMessage.INVALID_TOKEN));
         }
     }

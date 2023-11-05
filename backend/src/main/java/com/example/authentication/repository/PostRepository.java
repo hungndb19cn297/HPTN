@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface PostRepository extends JpaRepository<Post, Integer> {
     @Query("""
@@ -17,7 +19,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
                 left join p.bookmarks.user u
                 where (:id is null or p.id = :id)
                 And (:key is null or p.title like %:key% or p.content like %:key%)
-                And (:tagId is null or t.id = :tagId)
+                And (-1 in :tagId or t.id in :tagId)
                 And (:createdBy is null or p.createdBy = :createdBy)
                 And (:isBookmark is null or :isBookmark = false or u.id = :userId)
                 And p.deletedAt is null
@@ -25,9 +27,11 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             """ )
     Page<Post> searchPost(Integer id,
                           String key,
-                          Integer tagId,
+                          List<Integer> tagId,
                           Boolean isBookmark,
                           Integer createdBy,
                           Integer userId,
                           PageRequest of);
+
+    Integer countByCreatedBy(Integer userId);
 }

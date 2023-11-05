@@ -10,7 +10,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class CommentRequestDto {
-    @Length(max = 1500, min = 1)
+    @Length(max = 2000, min = 1)
     @NotNull
     private String content;
     private Integer parentId;

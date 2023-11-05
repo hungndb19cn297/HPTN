@@ -57,7 +57,7 @@ export default function CreatePost() {
         } catch (error) {
           setTitleValue(post.title);
         }
-        const tags = post.tags.map((x: any) => x.name);
+        const tags = post.tags.map((x) => x.name);
         setTagSelected(tags);
       })
       .catch((error) => console.log(error));
@@ -65,7 +65,7 @@ export default function CreatePost() {
     axiosAuthClient
       .post("/tags/pub/search", {})
       .then((response: any) => {
-        setNames(response.tags.map((x : any) => x.name));
+        setNames(response.tags.map((x) => x.name));
         setAllTag(response.tags);
       })
       .catch((error) => console.log(error));
@@ -90,8 +90,8 @@ export default function CreatePost() {
             title: JSON.stringify(titleValue),
             content: JSON.stringify(contentValue),
             tagIds: allTag
-              .filter((t: any) => tagSelected.includes(t?.name))
-              .map((t: any) => t.id),
+              .filter((t) => tagSelected.includes(t.name))
+              .map((t) => t.id),
           });
           router.push("/post?postId=" + response);
         } else {

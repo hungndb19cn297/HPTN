@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
     Integer countByPostId(Integer id);
+    Integer countByCreatedBy(Integer id);
 
     List<Comment> findAllByPostId(Integer postId);
 

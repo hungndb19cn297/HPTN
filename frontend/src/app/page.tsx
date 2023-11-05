@@ -8,25 +8,38 @@ import "./globals.css";
 import axiosAuthClient from "@/api/axiosClient";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function Home() {
-  // const [isLogin, setIsLogin] = useState('')
-  // useEffect(() => {
-  //   let isLogin = localStorage.getItem('isLogin')
-  //   setIsLogin(isLogin !== 'true' ? 'false' : isLogin)
-  // }, [])
-
+export default function Home(search: any) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [posts, updatePosts] = useState([]);
   const [pageIndex, setPageIndex] = useState(
-    Number.isNaN(Number(searchParams.get("pageIndex"))) ? 1 : Number(searchParams.get("pageIndex")) < 1 ? 1 : Number(searchParams.get("pageIndex"))
+    Number.isNaN(Number(searchParams.get("pageIndex")))
+      ? 1
+      : Number(searchParams.get("pageIndex")) < 1
+      ? 1
+      : Number(searchParams.get("pageIndex"))
   );
   const [pageSize, setPageSize] = useState(20);
   const [totalElement, setTotalElement] = useState(0);
+  const [url, setUrl] = useState("/");
+  search = { ...search.search, pageIndex: pageIndex };
   useEffect(() => {
+    setUrl(window.location.pathname);
+    console.log(JSON.stringify(search))
+    axiosAuthClient
+      .post("/posts/pub/search", search)
+      .then((response: any) => {
+        updatePosts(response.posts);
+        setPageIndex(response.pageIndex);
+        setPageSize(response.pageSize);
+        setTotalElement(Math.ceil(response.totalElement / response.pageSize));
+      })
+      .catch((error) => console.log(error));
+  }, [JSON.stringify(search)]);
+  function handleChange(event: any, page: number) {
     axiosAuthClient
       .post("/posts/pub/search", {
-        pageIndex: pageIndex
+        pageIndex: page,
       })
       .then((response: any) => {
         updatePosts(response.posts);
@@ -35,26 +48,13 @@ export default function Home() {
         setTotalElement(Math.ceil(response.totalElement / response.pageSize));
       })
       .catch((error) => console.log(error));
-  }, []);
-  function handleChange(event: any, page: number) {
-    axiosAuthClient
-        .post("/posts/pub/search", {
-          pageIndex: page
-        })
-        .then((response: any) => {
-          updatePosts(response.posts);
-          setPageIndex(response.pageIndex);
-          setPageSize(response.pageSize);
-          setTotalElement(Math.ceil(response.totalElement / response.pageSize));
-        })
-        .catch((error) => console.log(error));
-    router.push("/?pageIndex=" + (page))
+    router.push(url + "?pageIndex=" + page);
   }
 
   return (
     <Container>
-      {posts.map((post) => (
-        <PostCard post={post} key={post.id} />
+      {posts.map((post, index) => (
+        <PostCard post={post} key={index} />
       ))}
       <Pagination
         count={totalElement}

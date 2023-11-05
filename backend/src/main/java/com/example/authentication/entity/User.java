@@ -9,6 +9,9 @@ import java.util.List;
 @Setter
 @Data
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Table(name = "users")
 public class User extends CRUEntity{
     @Id

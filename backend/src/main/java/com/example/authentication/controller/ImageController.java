@@ -24,7 +24,7 @@ public class ImageController {
     private FileService fileService;
 
     @PostMapping
-    public String uploadImage(@RequestParam MultipartFile file, Authentication authentication){
+    public String uploadImage(MultipartFile file){
         Integer userId = ((MyUserDetail) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal()).getId();
         Integer id = null;
@@ -33,11 +33,11 @@ public class ImageController {
         } catch (IOException e) {
             throw new ApiException(ErrorMessage.INVALID_FILE);
         }
-        return "http://localhost:8080/api/images/load/" + id;
+        return "http://localhost:8080/api/images/pub/" + id;
     }
 
     @GetMapping("/pub/{id}")
-    public Mono<Resource> streamFileByWords(@PathVariable Integer id) throws IOException {
+    public Mono<Resource> streamFile(@PathVariable Integer id) throws IOException {
         return fileService.streamFile(id);
     }
 }

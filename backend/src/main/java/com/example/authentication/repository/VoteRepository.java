@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface VoteRepository extends JpaRepository<Vote, Integer> {
     @Query("Select sum(vote) from Vote v where v.postId = :id")
     Integer getTotalVote(Integer id);
+
+    Vote findOneByPostIdAndUserId(Integer postId, Integer userId);
 }

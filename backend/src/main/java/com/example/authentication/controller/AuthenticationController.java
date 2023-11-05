@@ -39,4 +39,9 @@ public class AuthenticationController {
     public TokenResponse refreshToken(HttpServletRequest request, HttpServletResponse response) {
         return authenticationService.refreshToken(request, response);
     }
+
+    @PostMapping("out")
+    public Boolean logout(HttpServletRequest request, HttpServletResponse response){
+        return authenticationService.logout(request, response);
+    }
 }

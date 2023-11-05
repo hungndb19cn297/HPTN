@@ -33,12 +33,15 @@ export default function SignIn() {
         email: data.get("email"),
         password: data.get("password"),
       });
-      console.log(response)
+      console.log(response);
       if (!!response?.accessToken) {
         localStorage.setItem("token", response?.accessToken);
-        localStorage.setItem("fullName", response?.firstName + " " + response?.lastName)
-        localStorage.setItem("avatar", response?.avatar)
-        localStorage.setItem("id", response?.id)
+        localStorage.setItem(
+          "fullName",
+          response?.firstName + " " + response?.lastName
+        );
+        localStorage.setItem("avatar", response?.avatar);
+        localStorage.setItem("id", response?.id);
         router.push("/");
       }
     } catch (error: any) {
@@ -143,7 +146,7 @@ export default function SignIn() {
             </Snackbar>
             <Grid container>
               <Grid item xs>
-                <Link href="#">Quên mật khẩu?</Link>
+                {/* <Link href="#">Quên mật khẩu?</Link> */}
               </Grid>
               <Grid item>
                 <Link href="/signup">Bạn chưa có tài khoản?</Link>
@@ -152,24 +155,6 @@ export default function SignIn() {
           </Box>
         </Box>
       </Container>
-      <Button
-        onClick={async () => {
-          try {
-            const response = await axiosAuthClient.post("/controller", {
-              pageIndex: 1,
-              pageSize: 10,
-            });
-          } catch (error: any) {
-            setError("");
-            console.log(error);
-
-            setIsError(true);
-            setOpen(true);
-          }
-        }}
-      >
-        asd
-      </Button>
     </ThemeProvider>
   );
 }

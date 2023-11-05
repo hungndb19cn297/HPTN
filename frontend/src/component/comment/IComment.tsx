@@ -1,11 +1,12 @@
 interface IComment {
-    avatarSrc: any,
-    authorName: any,
-    questionDate: any,
-    questionTitle: any,
+    avatar: any,
+    fullName: any,
+    createdBy: any,
+    createdAt: any,
+    content: any,
     id: any
     parentId: any
-    replies: null | IComment[],
+    childrenComment: null | IComment[],
 }
 
 // interface ICommentX {

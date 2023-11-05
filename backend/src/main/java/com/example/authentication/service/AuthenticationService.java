@@ -98,4 +98,15 @@ public class AuthenticationService extends BaseService {
 
         return TokenResponse.builder().refreshToken(refreshToken).accessToken(accessToken).build();
     }
+
+    public Boolean logout(HttpServletRequest request, HttpServletResponse response) {
+        Cookie cookie = new Cookie("refresh-token", "");
+        cookie.setMaxAge(0);
+        cookie.setPath("/api/refresh-token");
+        response.addCookie(cookie);
+        Cookie cookie2 = new Cookie("access-token", "");
+        cookie2.setMaxAge(0);
+        response.addCookie(cookie2);
+        return true;
+    }
 }

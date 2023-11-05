@@ -15,6 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -59,7 +61,7 @@ public class PostService extends BaseService {
             throw new ApiException(ErrorMessage.PERMISSION_DENIED);
         Page<Post> postPage = postRepository.searchPost(requestDto.getId(),
                 requestDto.getKey(),
-                requestDto.getTagId(),
+                requestDto.getTagId() == null || requestDto.getTagId().isEmpty() ? new ArrayList<>(List.of(-1)) : requestDto.getTagId(),
                 requestDto.getIsBookmark(),
                 requestDto.getCreatedBy(),
                 userId,

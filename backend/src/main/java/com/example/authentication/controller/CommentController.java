@@ -23,13 +23,8 @@ public class CommentController {
 
     @PostMapping
     public CommentResponseDto createComment(@RequestBody @Valid CommentRequestDto requestDto){
-        Integer userId = null;
-        try {
-            userId =((MyUserDetail) SecurityContextHolder
+        Integer userId =((MyUserDetail) SecurityContextHolder
                     .getContext().getAuthentication().getPrincipal()).getId();
-        } catch (Exception ignored) {
-
-        }
         return commentService.createComment(requestDto, userId);
     }
 

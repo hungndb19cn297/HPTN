@@ -5,7 +5,6 @@ import UserCard from "@/component/app.card.user";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import "../globals.css";
-import { Button } from "@mui/material";
 import Comment from "@/component/comment/app.comment";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import Vote from "@/component/point/app.vote";
@@ -14,31 +13,90 @@ import EditIcon from "@mui/icons-material/Edit";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import axiosAuthClient from "@/api/axiosClient";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { Alert, Button, Snackbar, TextField } from "@mui/material";
 
 const EditorNoToolBar = dynamic(
   () => import("@/component/app.no.toolbar.editor.jsx"),
   { ssr: false }
 );
 
+function mapComment(response: any) {
+  return response.map((cmt) => {
+    let contentCmt;
+    try {
+      contentCmt = HTMLReactParser(
+        new QuillDeltaToHtmlConverter(JSON.parse(cmt.content).ops, {}).convert()
+      );
+    } catch (error) {
+      contentCmt = HTMLReactParser(cmt.content);
+    }
+    return {
+      avatar: cmt.createdBy.avatar,
+      fullName: cmt.createdBy.firstName + " " + cmt.createdBy.lastName,
+      createdBy: cmt.createdBy.id,
+      createdAt: cmt.createdAt,
+      content: contentCmt ?? "",
+      id: cmt.id,
+      parentId: null,
+      childrenComment: cmt.childrenComment.map((rep) => {
+        let contentRep = null;
+        try {
+          contentRep = HTMLReactParser(
+            new QuillDeltaToHtmlConverter(
+              JSON.parse(rep.content).ops,
+              {}
+            ).convert()
+          );
+        } catch (error) {
+          contentRep = HTMLReactParser(rep.content);
+        }
+        return {
+          avatar: rep.createdBy.avatar,
+          fullName: rep.createdBy.firstName + " " + rep.createdBy.lastName,
+          createdBy: rep.createdBy.id,
+          createdAt: rep.createdAt,
+          content: contentRep ?? "",
+          id: rep.id,
+          parentId: cmt.id,
+          childrenComment: null,
+        };
+      }),
+    };
+  });
+}
+
 const Post = () => {
   const [contentValue, setContentValue] = useState(<p></p>);
-  const [titleValue, setTitleValue] = useState(<p></p>);
+  const [titleValue, setTitleValue] = useState(<p>Loading...</p>);
   const [tagIds, setTagIds] = useState();
   const router = useRouter();
   const searchParams = useSearchParams();
   const postId = searchParams.get("postId");
   const [notFound, setNotFound] = useState(false);
   const [thisPost, setThisPost] = useState();
+  const [comments, setComments] = useState(null);
+  const [isLogin, setIsLogin] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [vote, setVote] = useState(0);
+  const [totalVote, setTotalVote] = useState(0);
+  const [bookmark, setBookmark] = useState(false);
+  const [totalBookmark, setTotalBookmark] = useState(0);
   useEffect(() => {
+    setIsLogin(!!localStorage.getItem("id"));
+    setUserId(localStorage.getItem("id"));
     axiosAuthClient
       .post("/posts/pub/search", { id: postId })
       .then((response: any) => {
+        console.log(response);
         if (response.posts.length !== 1) {
           setNotFound(true);
           return;
         }
         const post = response.posts[0];
-        setThisPost(post)
+        setThisPost(post);
+        setTotalVote(post.voteCount ?? 0);
+        setTotalBookmark(post.bookmarksCount ?? 0);
         try {
           setContentValue(
             HTMLReactParser(
@@ -66,159 +124,217 @@ const Post = () => {
         setTagIds(post.tagIds);
       })
       .catch((error: any) => console.log(error));
-    console.log(contentValue);
+
+    axiosAuthClient
+      .get("/comments/pub?postId=" + postId)
+      .then((response: any) => {
+        if (response.length > 0) {
+          setComments(mapComment(response));
+          console.log(response);
+        }
+      });
   }, []);
-  const avatarSrc = "Brand.jpg";
-  const authorName = "AlixXXXXce JohnsXXXXon";
-  const questionDate = "10/10/2XXXX023";
 
   const [comment, setComment] = useState(null);
-  const q1: IComment = {
-    avatarSrc: "Brand.jpg",
-    authorName: "Alice Johnson",
-    questionDate: "10/10/2023",
-    questionTitle:
-      HTMLReactParser(`<p>Trong bài giới thiệu đầu tiên, các bạn đã có thể hiểu sức mạnh của NextJS trong lập trình website ở thời điểm năm 2023. Ở bài đầu tiên trong series lập trình NextJS, tôi sẽ hướng dẫn các bạn cách cài đặt môi trường để lập trình và cài đặt 1 chương trình NextJS đầu tiên.&lt;br&gt; Các bạn có thể xem bài viết về việc tại sao nên chọn lập trình NextJS ở thời điểm hiện tại <a href="https://viblo.asia/p/tai-sao-phai-hoc-nextjs-thay-vi-reactjs-trong-nam-2023-y37LdDroLov" rel="noopener noreferrer" target="_blank">tại đây</a></p><p>1. Cài đặt <a href="https://nodejs.org/en" rel="noopener noreferrer" target="_blank">NodeJS</a></p><ul><li>Như các bạn đã biết, ReactJS cũng như NextJS đều chạy trên môi trường NodeJS. Vì thế nên máy tính của bạn cần cài đặt môi trường Node để có thể lập trình NextJS. Các bước để cài đặt NodeJS:</li></ul><ol><li>Bước 1. Truy cập trang https://nodejs.org/en</li><li>Bước 2. Tải phiên bản NodeJS phù hợp với máy window hay macOS</li><li>Bước 3. Cài đặt</li><li>Bước 4. Kiểm tra thành công</li></ol><ul><li>Khi cài đặt xong NodeJS hãy chạy lệnh sau đây để kiểm tra xem bạn đã cài đặt thành công hay chưa:</li></ul><code class="ql-syntax" spellcheck="false">node -v
-    asd
-    a
-    sd
-    as
-    d
-    asd
-    a
-    sd
-    
-    asd
-    
-    asd
-    </code>`),
-    id: 123,
-    parentId: null,
-    replies: [
-      {
-        avatarSrc: "Brand.jpg",
-        authorName: "Alice Johnson",
-        questionDate: "10/10/2023",
-        questionTitle:
-          HTMLReactParser(`<p>Trong bài giới thiệu đầu tiên, các bạn đã có thể hiểu sức mạnh của NextJS trong lập trình website ở thời điểm năm 2023. Ở bài đầu tiên trong series lập trình NextJS, tôi sẽ hướng dẫn các bạn cách cài đặt môi trường để lập trình và cài đặt 1 chương trình NextJS đầu tiên.&lt;br&gt; Các bạn có thể xem bài viết về việc tại sao nên chọn lập trình NextJS ở thời điểm hiện tại <a href="https://viblo.asia/p/tai-sao-phai-hoc-nextjs-thay-vi-reactjs-trong-nam-2023-y37LdDroLov" rel="noopener noreferrer" target="_blank">tại đây</a></p><p>1. Cài đặt <a href="https://nodejs.org/en" rel="noopener noreferrer" target="_blank">NodeJS</a></p><ul><li>Như các bạn đã biết, ReactJS cũng như NextJS đều chạy trên môi trường NodeJS. Vì thế nên máy tính của bạn cần cài đặt môi trường Node để có thể lập trình NextJS. Các bước để cài đặt NodeJS:</li></ul><ol><li>Bước 1. Truy cập trang https://nodejs.org/en</li><li>Bước 2. Tải phiên bản NodeJS phù hợp với máy window hay macOS</li><li>Bước 3. Cài đặt</li><li>Bước 4. Kiểm tra thành công</li></ol><ul><li>Khi cài đặt xong NodeJS hãy chạy lệnh sau đây để kiểm tra xem bạn đã cài đặt thành công hay chưa:</li></ul><code class="ql-syntax" spellcheck="false">node -v
-    asd
-    a
-    sd
-    as
-    d
-    asd
-    a
-    sd
-    
-    asd
-    
-    asd
-    </code>`),
-        id: 222,
-        parentId: 123,
-        replies: null,
-      },
-      {
-        avatarSrc: "Brand.jpg",
-        authorName: "Alice Johnson",
-        questionDate: "10/10/2023",
-        questionTitle:
-          HTMLReactParser(`<p>Trong bài giới thiệu đầu tiên, các bạn đã có thể hiểu sức mạnh của NextJS trong lập trình website ở thời điểm năm 2023. Ở bài đầu tiên trong series lập trình NextJS, tôi sẽ hướng dẫn các bạn cách cài đặt môi trường để lập trình và cài đặt 1 chương trình NextJS đầu tiên.&lt;br&gt; Các bạn có thể xem bài viết về việc tại sao nên chọn lập trình NextJS ở thời điểm hiện tại <a href="https://viblo.asia/p/tai-sao-phai-hoc-nextjs-thay-vi-reactjs-trong-nam-2023-y37LdDroLov" rel="noopener noreferrer" target="_blank">tại đây</a></p><p>1. Cài đặt <a href="https://nodejs.org/en" rel="noopener noreferrer" target="_blank">NodeJS</a></p><ul><li>Như các bạn đã biết, ReactJS cũng như NextJS đều chạy trên môi trường NodeJS. Vì thế nên máy tính của bạn cần cài đặt môi trường Node để có thể lập trình NextJS. Các bước để cài đặt NodeJS:</li></ul><ol><li>Bước 1. Truy cập trang https://nodejs.org/en</li><li>Bước 2. Tải phiên bản NodeJS phù hợp với máy window hay macOS</li><li>Bước 3. Cài đặt</li><li>Bước 4. Kiểm tra thành công</li></ol><ul><li>Khi cài đặt xong NodeJS hãy chạy lệnh sau đây để kiểm tra xem bạn đã cài đặt thành công hay chưa:</li></ul><code class="ql-syntax" spellcheck="false">node -v
-    asd
-    a
-    sd
-    as
-    d
-    asd
-    a
-    sd
-    
-    asd
-    
-    asd
-    </code>`),
-        id: 223,
-        parentId: 123,
-        replies: null,
-      },
-    ],
-  };
-  const [isUpVote, setIsUpVote] = useState(false);
-  const [isDownVote, setIsDownVote] = useState(false);
-  console.log(thisPost)
+  const [err, setErr] = useState("");
+  if (isLogin) {
+    axiosAuthClient.get("/votes?postId=" + postId).then((response: any) => {
+      setVote(response);
+    });
+    axiosAuthClient.get("/bookmarks?postId=" + postId).then((response: any) => {
+      setBookmark(response);
+    });
+  }
+
   if (notFound === false)
     return (
       <>
-        <Container>
-          <Card style={{ padding: 20, marginBottom: 40 }}>
-            <Row>
-              <div style={{ width: "fit-content" }}>
-                <UserCard
-                  avatarSrc={thisPost?.createdBy?.avatar}
-                  authorName={(thisPost?.createdBy?.firstName ?? "" )+ " " + (thisPost?.createdBy?.lastName ?? "") }    
-                  questionDate={thisPost?.createdAt}
-                />
-              </div>
-              <Col>
-                <div className="d-flex justify-content-between">
-                  <div>
-                    <BookmarkIcon style={{ width: 40, height: 40 }} />
-                    <Vote
-                      isUpVote={isUpVote}
-                      isDownVote={isDownVote}
-                      point={0}
-                      clickUpVote={() => {
-                        setIsUpVote(!isUpVote);
-                        isUpVote === false ? setIsDownVote(false) : null;
-                      }}
-                      clickDownVote={() => {
-                        setIsDownVote(!isDownVote);
-                        isDownVote === false ? setIsUpVote(false) : null;
-                      }}
-                    />
-                  </div>
-                  <div style={{ paddingRight: 12 }}>
-                    <EditIcon
-                      style={{ width: 40, height: 40 }}
-                      className="yellow"
-                    />
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <DeleteIcon
-                      style={{ width: 40, height: 40 }}
-                      className="red"
-                    />
-                  </div>
-                </div>
-              </Col>
-            </Row>
-            <h2>{titleValue}</h2>
-            {contentValue}
-          </Card>
-          <h2 style={{ color: "#000" }}>Bình luận</h2>
-          <EditorNoToolBar
-            value={comment}
-            setValue={setComment}
-            placeholder="Viết câu trả lời hoặc bình luận của bạn tại đây ..."
-          />
-          <div
-            style={{ position: "relative", marginTop: 10, marginBottom: 80 }}
+        <Snackbar
+          open={err != ""}
+          autoHideDuration={6000}
+          onClose={() => setErr("")}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert
+            severity="error"
+            sx={{ width: "100%" }}
+            onClick={() => setErr("")}
           >
-            <Button
-              variant="contained"
-              style={{ position: "absolute", right: 0 }}
-              onClick={() => {
-                console.log(comment);
+            {err}
+          </Alert>
+        </Snackbar>
+        <Card style={{ padding: 20, marginBottom: 40 }}>
+          <Row>
+            <div style={{ width: "fit-content" }}>
+              <UserCard
+                avatarSrc={thisPost?.createdBy?.avatar}
+                authorName={
+                  (thisPost?.createdBy?.firstName ?? "") +
+                  " " +
+                  (thisPost?.createdBy?.lastName ?? "")
+                }
+                questionDate={thisPost?.createdAt}
+                userId={thisPost?.createdBy?.id}
+              />
+            </div>
+            <Col>
+              <div className="d-flex justify-content-between">
+                <div className="d-flex">
+                  <div
+                    className="d-flex"
+                    style={{
+                      display: "inline-block",
+                      border: "solid #000 1px",
+                      borderRadius: 8,
+                      marginRight: 30,
+                    }}
+                  >
+                    <BookmarkIcon
+                      style={{
+                        width: 40,
+                        height: 40,
+                        color: bookmark ? "#3b74ac" : "#000",
+                      }}
+                      onClick={() => {
+                        if (isLogin) {
+                          axiosAuthClient
+                            .post("/bookmarks?postId=" + postId)
+                            .then((response: any) => {
+                              setBookmark(response.isBookmark);
+                              setTotalBookmark(response.totalBookmark);
+                            });
+                        }
+                      }}
+                    />
+                    <div
+                      className="d-flex"
+                      style={{
+                        justifyContent: "center",
+                        minWidth: 60,
+                        alignItems: "center",
+                        fontSize: 20,
+                        fontWeight: 600,
+                        marginLeft: -8,
+                      }}
+                    >
+                      <div className="">{totalBookmark}</div>
+                    </div>
+                  </div>
+                  <Vote
+                    isUpVote={vote == 1}
+                    isDownVote={vote == -1}
+                    point={totalVote}
+                    clickUpVote={() => {
+                      axiosAuthClient
+                        .post("/votes?postId=" + postId + "&vote=1")
+                        .then((response: any) => {
+                          setVote(response.vote);
+                          setTotalVote(response.totalVote);
+                        });
+                    }}
+                    clickDownVote={() => {
+                      axiosAuthClient
+                        .post("/votes?postId=" + postId + "&vote=-1")
+                        .then((response: any) => {
+                          setVote(response.vote);
+                          setTotalVote(response.totalVote);
+                        });
+                    }}
+                  />
+                </div>
+                {thisPost?.createdBy?.id != null &&
+                  userId == thisPost?.createdBy.id && (
+                    <div style={{ paddingRight: 12 }}>
+                      <Link href={"/post/update?postId=" + postId}>
+                        <EditIcon
+                          style={{ width: 40, height: 40 }}
+                          className="yellow"
+                        />
+                      </Link>
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      <DeleteIcon
+                        style={{ width: 40, height: 40 }}
+                        className="red"
+                      />
+                    </div>
+                  )}
+              </div>
+            </Col>
+          </Row>
+          <h2>{titleValue}</h2>
+          {contentValue}
+        </Card>
+        <h2 style={{ color: "#000" }}>Bình luận</h2>
+        {isLogin && (
+          <>
+            <EditorNoToolBar
+              value={comment}
+              setValue={setComment}
+              placeholder="Viết câu trả lời hoặc bình luận của bạn tại đây ..."
+            />
+            <div
+              style={{
+                position: "relative",
+                marginTop: 10,
+                marginBottom: 80,
               }}
             >
-              Gửi
-            </Button>
-          </div>
-
-          <Comment comment={q1} />
-        </Container>
+              <Button
+                variant="contained"
+                style={{ position: "absolute", right: 0 }}
+                onClick={() => {
+                  if (
+                    comment == null ||
+                    comment.ops[0].insert.trim().length < 2 ||
+                    JSON.stringify(comment).length > 2000
+                  ) {
+                    setErr("Comment 1 -> 1200 ký tự");
+                    return;
+                  }
+                  axiosAuthClient
+                    .post("/comments", {
+                      content: JSON.stringify(comment),
+                      parentId: null,
+                      postId: postId,
+                    })
+                    .then((response: any) => {
+                      axiosAuthClient
+                        .get("/comments/pub?postId=" + postId)
+                        .then((response: any) => {
+                          if (response.length > 0) {
+                            setComments(mapComment(response));
+                            console.log(response);
+                          }
+                        });
+                    })
+                    .catch((err) => {
+                      setErr(JSON.stringify(err));
+                    });
+                }}
+              >
+                Gửi
+              </Button>
+            </div>
+          </>
+        )}
+        {isLogin != null && !isLogin && (
+          <h4 style={{ color: "#000" }}>
+            Hãy <Link href={"/login"}>đăng nhập</Link> để bình luận nhé ^^
+          </h4>
+        )}
+        {comments != null &&
+          comments.map((x) => (
+            <Comment
+              key={x.id}
+              comment={x}
+              isLogin={isLogin}
+              setErr={setErr}
+              setComments={setComments}
+            />
+          ))}
       </>
-    )
-    else return (<></>)
+    );
+  else return <></>;
 };
 
 export default Post;

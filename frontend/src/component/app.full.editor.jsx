@@ -7,6 +7,9 @@ import '../app/globals.css'
 import axiosAuthClient from '@/api/axiosClient';
 import { QuillDeltaToHtmlConverter } from 'quill-delta-to-html'
 import ImageUploader from "quill-image-uploader";
+import ImageResize from 'quill-image-resize'
+ 
+Quill.register('modules/imageResize', ImageResize);
 Quill.register("modules/imageUploader", ImageUploader);
 
 const formats = [
@@ -40,19 +43,28 @@ const modules = {
         ['clean'],
         ['code-block'],
     ],
-    // clipboard: {
-    //     matchVisual: false,
-
-    // },
-
+    imageResize: {
+        displaySize: true
+    },
     imageUploader: {
         upload: (file) => {
             return new Promise((resolve, reject) => {
-                setTimeout(() => {
+                const formData = new FormData();
+                formData.append('file', file)
+                console.log(formData)
+                const config = {
+                    headers: {
+                      'Content-Type': 'multipart/form-data',
+                    },
+                }
+                axiosAuthClient.post('/images', formData, config)
+                .then((response) => {
+                    console.log(response)
                     resolve(
-                        "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/JavaScript-logo.png/480px-JavaScript-logo.png"
+                        response
                     );
-                }, 3500);
+                })
+                .catch((error) => console.log(error));
             });
         },
     }
@@ -99,7 +111,6 @@ function MyEditor(props) {
             placeholder='Bài viết...'
             theme="snow"
             onChange={(content, delta, source, editor) => {
-                // props.setValue(new QuillDeltaToHtmlConverter(JSON.parse(JSON.stringify(editor.getContents())).ops, {}).convert())
                 props.setValue(editor.getContents())
             }}
         />

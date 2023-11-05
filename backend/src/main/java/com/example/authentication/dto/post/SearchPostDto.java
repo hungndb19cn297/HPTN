@@ -5,12 +5,14 @@ import com.example.authentication.entity.Bookmark;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class SearchPostDto extends PagingDto {
     private Integer id;
     private String key;
-    private Integer tagId;
+    private List<Integer> tagId;
     private Boolean isBookmark = false;
     private Integer createdBy;
 }

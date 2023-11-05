@@ -7,4 +7,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BookmarkRepository extends JpaRepository<Bookmark, Integer> {
     Integer countByPostId(Integer id);
+
+    Boolean existsByUserIdAndPostId(Integer userId, Integer postId);
+
+    Bookmark findOneByUserIdAndPostId(Integer userId, Integer postId);
 }

@@ -7,4 +7,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FollowRepository extends JpaRepository<Follow, Integer> {
+    Integer countByToUserId(Integer userId);
+
+    Follow findOneByFromUserIdAndToUserId(Integer fromId, Integer toId);
 }

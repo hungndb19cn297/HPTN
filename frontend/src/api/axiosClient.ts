@@ -8,7 +8,6 @@ const axiosAuthClient = axios.create({
     baseURL: process.env.API_AUTH_URL,
     headers: {
         'content-type': 'application/json',
-        // 'Authorization': localStorage?.getItem('token')
         'Accept-Language': 'vi'
     },
     paramsSerializer: params => queryString.stringify(params),

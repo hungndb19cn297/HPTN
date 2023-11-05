@@ -10,18 +10,27 @@ import {
   Button,
   Image,
 } from "react-bootstrap";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Principal from "./header.principal";
 import { useEffect, useState } from "react";
+import axiosAuthClient from "@/api/axiosClient";
 function Header() {
   const path = usePathname();
-  const [fullName, setFullName] = useState("");
+  const [fullName, setFullName] = useState(null);
   const [avatar, setAvatar] = useState("");
+  const [search, setSearch] = useState("");
+  const router = useRouter();
+  const [userId, setUserId] = useState(null);
   useEffect(() => {
     setFullName(localStorage.getItem("fullName") ?? "");
     setAvatar(localStorage.getItem("avatar") ?? "");
+    setUserId(localStorage.getItem("id"));
   });
 
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    router.push("/search?key=" + search);
+  };
   return (
     <Navbar
       bg="light"
@@ -47,15 +56,6 @@ function Header() {
                 Chia sẻ kiến thức
               </Link>
             </Nav.Item>
-            {/* <Nav.Item>
-              <Link
-                href="/post"
-                className={path === "/posts" ? "nav-link active" : "nav-link"}
-                style={{ color: "#fff", marginLeft: 10 }}
-              >
-                Chia sẻ kiến thức
-              </Link>
-            </Nav.Item> */}
             <Nav.Item>
               <Link
                 href="/post/create"
@@ -67,8 +67,21 @@ function Header() {
                 Đăng bài
               </Link>
             </Nav.Item>
+            {fullName != "" && fullName != null && (
+              <Nav.Item>
+                <Link
+                  href="/post/bookmark"
+                  className={
+                    path === "/post/bookmark" ? "nav-link active" : "nav-link"
+                  }
+                  style={{ color: "#fff", marginLeft: 10 }}
+                >
+                  Xem bài viết đã lưu
+                </Link>
+              </Nav.Item>
+            )}
           </Nav>
-          <Form className="d-flex">
+          <Form className="d-flex" onSubmit={handleSubmit}>
             <Container
               style={{
                 width: "fit-content",
@@ -83,6 +96,7 @@ function Header() {
                 className="mr-2"
                 aria-label="Search"
                 style={{ paddingRight: 30 }}
+                onChange={(text) => setSearch(text.target.value)}
               />
               <Button
                 variant="outline-primary"
@@ -102,9 +116,13 @@ function Header() {
             </Container>
           </Form>
           <Nav>
-            <Nav.Link style={{ padding: 0 }}>
-              <Principal fullName={fullName} avatar={avatar}></Principal>
-            </Nav.Link>
+            <Nav style={{ padding: 0 }}>
+              <Principal
+                fullName={fullName}
+                avatar={avatar}
+                userId={userId}
+              ></Principal>
+            </Nav>
           </Nav>
         </Navbar.Collapse>
       </Container>
