@@ -42,6 +42,13 @@ public class PostController {
         return postService.updatePost(requestDto, userId);
     }
 
+    @DeleteMapping
+    public Integer deletePost(@RequestParam Integer postId){
+        Integer userId = ((MyUserDetail) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal()).getId();
+        return postService.deletePost(postId, userId);
+    }
+
     @PostMapping("pub/search")
     public PostResponseDtoPage searchPost(Authentication authentication, @RequestBody SearchPostDto requestDto){
         Integer userId = null;

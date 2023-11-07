@@ -8,6 +8,7 @@ import com.example.authentication.entity.Post;
 import com.example.authentication.exception.ApiException;
 import com.example.authentication.model.ErrorMessage;
 import com.example.authentication.utils.ConvertUtils;
+import com.example.authentication.utils.DateTimeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -53,12 +54,17 @@ public class CommentService extends BaseService {
                 tempC.setChildrenComment(new ArrayList<>());
                 tempC.setCreatedBy(ConvertUtils.convert(userRepository.findOneById(comment.getCreatedBy()), UseInfoDto.class));
             } else {
-                tempC.setDeleteAt(comment.getDeletedAt());
-                tempC.setId(comment.getId());
+                tempC = ConvertUtils.convert(comment, CommentResponseDto.class);
+                tempC.setCreatedBy(ConvertUtils.convert(userRepository.findOneById(comment.getCreatedBy()), UseInfoDto.class));
+                tempC.setChildrenComment(new ArrayList<>());
+                tempC.setDeletedAt(comment.getDeletedAt());
+                tempC.setContent("Bình luận này đã bị xoá lúc " + DateTimeUtils.dateToString(comment.getDeletedAt(), DateTimeUtils.FORMAT_DATE_TIME5));
             }
 
             if (comment.getParentId() != null && responseDtoMap.get(comment.getParentId()) != null) {
-                responseDtoMap.get(comment.getParentId()).getChildrenComment().add(tempC);
+                if (responseDtoMap.get(comment.getParentId()).getDeletedAt() == null) {
+                    responseDtoMap.get(comment.getParentId()).getChildrenComment().add(tempC);
+                }
             } else {
                 responseDtoMap.put(comment.getId(), tempC);
             }
@@ -67,5 +73,14 @@ public class CommentService extends BaseService {
         List<CommentResponseDto> responseDtos = new ArrayList<>(responseDtoMap.values());
         Collections.reverse(responseDtos);
         return responseDtos;
+    }
+
+    public Boolean deleteComment(Integer userId, Integer commentId){
+        Comment comment = commentRepository.findOneByCreatedByAndId(userId, commentId);
+        if (comment == null)
+            throw new ApiException(ErrorMessage.INVALID_COMMENT);
+        comment.setDeletedAt(new Date());
+        commentRepository.save(comment);
+        return true;
     }
 }

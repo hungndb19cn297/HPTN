@@ -1,26 +1,18 @@
 package com.example.authentication.dto.user;
 
 import com.example.authentication.model.ErrorMessage;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
-public class UserBaseDto {
+public class UserUpdateInfoDto {
     @NotBlank(message = ErrorMessage.NOT_BLANK)
-    @Length(min = 4, max = 255)
+    @Length(min = 4, max = 255, message = ErrorMessage.INVALID_LENGTH)
     private String firstName;
     @NotBlank(message = ErrorMessage.NOT_BLANK)
-    @Length(min = 4, max = 255)
+    @Length(min = 4, max = 255, message = ErrorMessage.INVALID_LENGTH)
     private String lastName;
-    @NotBlank(message = ErrorMessage.NOT_BLANK)
-    @Email(message = ErrorMessage.INVALID_EMAIL)
-    private String email;
 }

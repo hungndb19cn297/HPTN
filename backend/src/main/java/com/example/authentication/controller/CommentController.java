@@ -32,4 +32,11 @@ public class CommentController {
     public List<CommentResponseDto> getComment(Integer postId){
         return commentService.getComment(postId);
     }
+
+    @DeleteMapping
+    public Boolean deleteComment(@RequestParam Integer id){
+        Integer userId =((MyUserDetail) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal()).getId();
+        return commentService.deleteComment(userId, id);
+    }
 }

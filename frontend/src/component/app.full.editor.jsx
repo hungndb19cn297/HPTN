@@ -102,12 +102,14 @@ const modules = {
 
 
 function MyEditor(props) {
+    console.log(props.value)
     return (
         <ReactQuill
             style={{ background: '#fff', color: '#000' }}
             modules={modules}
             formats={formats}
             defaultValue={props.value}
+            value={props.value}
             placeholder='Bài viết...'
             theme="snow"
             onChange={(content, delta, source, editor) => {

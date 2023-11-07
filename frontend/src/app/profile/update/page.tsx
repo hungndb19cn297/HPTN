@@ -12,13 +12,18 @@ import { Image } from "react-bootstrap";
 import axiosAuthClient from "@/api/axiosClient";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Snackbar } from "@mui/material";
 import Alert from "@mui/material/Alert";
 
 const defaultTheme = createTheme();
 export default function SignUp() {
+  const [myUserId, setMyUserId] = useState(null);
   const router = useRouter();
+  useEffect(() => {
+    setMyUserId(localStorage.getItem("id"));
+  });
+
   const [error, setError] = React.useState("");
   const [isError, setIsError] = React.useState([false, false, false, false]);
   const [open, setOpen] = React.useState(false);
@@ -27,30 +32,22 @@ export default function SignUp() {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     let body = {
-      email: data.get("email"),
-      password: data.get("password"),
       firstName: data.get("firstName"),
       lastName: data.get("lastName"),
     };
 
     try {
-      const response = await axiosAuthClient.post("/signup", body);
-      router.push(`/login?signup=true`);
+      const response = await axiosAuthClient.put("/users/info", body);
+      router.push(`/profile?isSuccess=true&userId=` + myUserId);
     } catch (error: any) {
-      console.log(error.response.data.error)
       let thisErr =
         error.response.data.error != undefined ? error.response.data.error : "";
-      if (thisErr == "") {
-        let errs = [false, false, false, false];
-        console.log(error.response.data);
+      if (thisErr?.trim() == "Sai mật khẩu cũ") {
+        setIsError([true, false]);
+      } else if (thisErr == "") {
+        let errs = [false, false];
         error.response.data.forEach((element: any) => {
           thisErr += element.field + " " + element.message + " - ";
-          if (element.field == "email") {
-            errs[2] = true;
-          }
-          if (element.field == "password") {
-            errs[3] = true;
-          }
           if (element.field == "firstName") {
             errs[0] = true;
           }
@@ -58,11 +55,11 @@ export default function SignUp() {
             errs[1] = true;
           }
         });
-        setIsError(errs)
+        setIsError(errs);
       } else {
-        setIsError([false, false, true, false])
+        setIsError([false, false]);
       }
-      setError(thisErr.substring(0, thisErr.length-2));
+      setError(thisErr.substring(0, thisErr.length - 2));
       setOpen(true);
     }
   };
@@ -112,7 +109,7 @@ export default function SignUp() {
         >
           <Image src="logo2.png" width={60} height={60}></Image>
           <Typography component="h1" variant="h5">
-            Đăng ký
+            Đổi thông tin cá nhân
           </Typography>
           <Box
             component="form"
@@ -121,50 +118,24 @@ export default function SignUp() {
             sx={{ mt: 3 }}
           >
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <TextField
-                  autoComplete="given-name"
-                  name="firstName"
                   required
                   fullWidth
-                  id="firstName"
+                  name="firstName"
                   label="Họ"
-                  autoFocus
+                  id="firstName"
                   error={isError[0]}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <TextField
                   required
                   fullWidth
-                  id="lastName"
-                  label="Tên"
                   name="lastName"
-                  autoComplete="family-name"
+                  label="Tên"
+                  id="lastName"
                   error={isError[1]}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  id="email"
-                  label="Địa chỉ Email"
-                  name="email"
-                  autoComplete="email"
-                  error={isError[2]}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="password"
-                  label="Mật khẩu"
-                  type="password"
-                  id="password"
-                  autoComplete="new-password"
-                  error={isError[3]}
                 />
               </Grid>
             </Grid>
@@ -174,11 +145,11 @@ export default function SignUp() {
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
             >
-              Đăng ký
+              Đổi thông tin cá nhân
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link href="/login">Bạn đã có tài khoản?</Link>
+                <Link href="/profile/change-pass">Đổi mật khẩu</Link>
               </Grid>
             </Grid>
           </Box>

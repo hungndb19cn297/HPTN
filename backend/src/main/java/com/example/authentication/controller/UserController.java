@@ -1,11 +1,12 @@
 package com.example.authentication.controller;
 
-import com.example.authentication.dto.user.UserDataDto;
+import com.example.authentication.dto.user.*;
 import com.example.authentication.exception.ApiException;
 import com.example.authentication.model.ErrorMessage;
 import com.example.authentication.security.MyUserDetail;
 import com.example.authentication.service.FileService;
 import com.example.authentication.service.UserService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,5 +41,19 @@ public class UserController {
             throw new ApiException(ErrorMessage.INVALID_FILE);
         }
         return userService.setAvatar(userId, "https://kuroneko-it.me/api/images/pub/" + id);
+    }
+
+    @PutMapping("info")
+    public UserUpdateInfoDto updateInfo(@Valid @RequestBody UserUpdateInfoDto requestDto){
+        Integer userId = ((MyUserDetail) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal()).getId();
+        return userService.updateInfo(userId, requestDto);
+    }
+
+    @PutMapping("password")
+    public Boolean updatePassword(@Valid @RequestBody UserUpdatePasswordDto requestDto){
+        Integer userId = ((MyUserDetail) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal()).getId();
+        return userService.updatePassword(userId, requestDto);
     }
 }

@@ -14,7 +14,17 @@ import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import axiosAuthClient from "@/api/axiosClient";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Alert, Button, Snackbar, TextField } from "@mui/material";
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Snackbar,
+  TextField,
+} from "@mui/material";
 
 const EditorNoToolBar = dynamic(
   () => import("@/component/app.no.toolbar.editor.jsx"),
@@ -73,24 +83,30 @@ const Post = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const postId = searchParams.get("postId");
-  const [notFound, setNotFound] = useState(false);
   const [thisPost, setThisPost] = useState();
   const [comments, setComments] = useState(null);
   const [isLogin, setIsLogin] = useState(null);
   const [userId, setUserId] = useState(null);
-  const [vote, setVote] = useState(0);
-  const [totalVote, setTotalVote] = useState(0);
+  const [myId, setMyId] = useState("123");
+  const [vote, setVote] = useState(null as any);
+  const [totalVote, setTotalVote] = useState(null as any);
   const [bookmark, setBookmark] = useState(false);
   const [totalBookmark, setTotalBookmark] = useState(0);
+  const [openPostDialog, setOpenPostDialog] = useState(false);
+
   useEffect(() => {
     setIsLogin(!!localStorage.getItem("id"));
     setUserId(localStorage.getItem("id"));
+    setMyId(localStorage.getItem("id"));
+    if (searchParams.get("notPermission") == "true") {
+      setErr("Bạn không có quyền chỉnh sửa bài viết này");
+    }
     axiosAuthClient
       .post("/posts/pub/search", { id: postId })
       .then((response: any) => {
         console.log(response);
         if (response.posts.length !== 1) {
-          setNotFound(true);
+          router.push("../home?postNotFound=true");
           return;
         }
         const post = response.posts[0];
@@ -132,209 +148,251 @@ const Post = () => {
           setComments(mapComment(response));
           console.log(response);
         }
-      });
+      })
+      .catch((er) => router.push("../home?postNotFound=true"));
   }, []);
 
   const [comment, setComment] = useState(null);
   const [err, setErr] = useState("");
-  if (isLogin) {
-    axiosAuthClient.get("/votes?postId=" + postId).then((response: any) => {
-      setVote(response);
-    });
-    axiosAuthClient.get("/bookmarks?postId=" + postId).then((response: any) => {
-      setBookmark(response);
-    });
+  if (isLogin && (vote == null || bookmark == null)) {
+    axiosAuthClient
+      .get("/votes?postId=" + postId)
+      .then((response: any) => {
+        setVote(response ?? 0);
+      })
+      .catch(() => setVote(0));
+    axiosAuthClient
+      .get("/bookmarks?postId=" + postId)
+      .then((response: any) => {
+        setBookmark(response ?? 0);
+      })
+      .catch(() => setVote(0));
   }
 
-  if (notFound === false)
-    return (
-      <>
-        <Snackbar
-          open={err != ""}
-          autoHideDuration={6000}
-          onClose={() => setErr("")}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+  return (
+    <>
+      <Snackbar
+        open={err != ""}
+        autoHideDuration={6000}
+        onClose={() => setErr("")}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          severity="error"
+          sx={{ width: "100%" }}
+          onClick={() => setErr("")}
         >
-          <Alert
-            severity="error"
-            sx={{ width: "100%" }}
-            onClick={() => setErr("")}
-          >
-            {err}
-          </Alert>
-        </Snackbar>
-        <Card style={{ padding: 20, marginBottom: 40 }}>
-          <Row>
-            <div style={{ width: "fit-content" }}>
-              <UserCard
-                avatarSrc={thisPost?.createdBy?.avatar}
-                authorName={
-                  (thisPost?.createdBy?.firstName ?? "") +
-                  " " +
-                  (thisPost?.createdBy?.lastName ?? "")
-                }
-                questionDate={thisPost?.createdAt}
-                userId={thisPost?.createdBy?.id}
-              />
-            </div>
-            <Col>
-              <div className="d-flex justify-content-between">
-                <div className="d-flex">
+          {err}
+        </Alert>
+      </Snackbar>
+      <Card style={{ padding: 20, marginBottom: 40 }}>
+        <Row>
+          <div style={{ width: "fit-content" }}>
+            <UserCard
+              avatarSrc={thisPost?.createdBy?.avatar}
+              authorName={
+                (thisPost?.createdBy?.firstName ?? "") +
+                " " +
+                (thisPost?.createdBy?.lastName ?? "")
+              }
+              questionDate={thisPost?.createdAt}
+              userId={thisPost?.createdBy?.id}
+            />
+          </div>
+          <Col>
+            <div className="d-flex justify-content-between">
+              <div className="d-flex">
+                <div
+                  className="d-flex"
+                  style={{
+                    display: "inline-block",
+                    border: "solid #000 1px",
+                    borderRadius: 8,
+                    marginRight: 30,
+                  }}
+                >
+                  <BookmarkIcon
+                    style={{
+                      width: 40,
+                      height: 40,
+                      color: bookmark ? "#3b74ac" : "#000",
+                    }}
+                    onClick={() => {
+                      if (isLogin) {
+                        axiosAuthClient
+                          .post("/bookmarks?postId=" + postId)
+                          .then((response: any) => {
+                            setBookmark(response.isBookmark);
+                            setTotalBookmark(response.totalBookmark);
+                          });
+                      }
+                    }}
+                  />
                   <div
                     className="d-flex"
                     style={{
-                      display: "inline-block",
-                      border: "solid #000 1px",
-                      borderRadius: 8,
-                      marginRight: 30,
+                      justifyContent: "center",
+                      minWidth: 60,
+                      alignItems: "center",
+                      fontSize: 20,
+                      fontWeight: 600,
+                      marginLeft: -8,
                     }}
                   >
-                    <BookmarkIcon
-                      style={{
-                        width: 40,
-                        height: 40,
-                        color: bookmark ? "#3b74ac" : "#000",
-                      }}
-                      onClick={() => {
-                        if (isLogin) {
-                          axiosAuthClient
-                            .post("/bookmarks?postId=" + postId)
-                            .then((response: any) => {
-                              setBookmark(response.isBookmark);
-                              setTotalBookmark(response.totalBookmark);
-                            });
-                        }
-                      }}
-                    />
-                    <div
-                      className="d-flex"
-                      style={{
-                        justifyContent: "center",
-                        minWidth: 60,
-                        alignItems: "center",
-                        fontSize: 20,
-                        fontWeight: 600,
-                        marginLeft: -8,
-                      }}
-                    >
-                      <div className="">{totalBookmark}</div>
-                    </div>
+                    <div className="">{totalBookmark}</div>
                   </div>
-                  <Vote
-                    isUpVote={vote == 1}
-                    isDownVote={vote == -1}
-                    point={totalVote}
-                    clickUpVote={() => {
-                      axiosAuthClient
-                        .post("/votes?postId=" + postId + "&vote=1")
-                        .then((response: any) => {
-                          setVote(response.vote);
-                          setTotalVote(response.totalVote);
-                        });
-                    }}
-                    clickDownVote={() => {
-                      axiosAuthClient
-                        .post("/votes?postId=" + postId + "&vote=-1")
-                        .then((response: any) => {
-                          setVote(response.vote);
-                          setTotalVote(response.totalVote);
-                        });
-                    }}
-                  />
                 </div>
-                {thisPost?.createdBy?.id != null &&
-                  userId == thisPost?.createdBy.id && (
-                    <div style={{ paddingRight: 12 }}>
-                      <Link href={"/post/update?postId=" + postId}>
-                        <EditIcon
-                          style={{ width: 40, height: 40 }}
-                          className="yellow"
-                        />
-                      </Link>
-                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                      <DeleteIcon
-                        style={{ width: 40, height: 40 }}
-                        className="red"
-                      />
-                    </div>
-                  )}
+                <Vote
+                  isUpVote={vote == 1}
+                  isDownVote={vote == -1}
+                  point={totalVote}
+                  clickUpVote={() => {
+                    axiosAuthClient
+                      .post("/votes?postId=" + postId + "&vote=1")
+                      .then((response: any) => {
+                        setVote(response.vote);
+                        setTotalVote(response.totalVote);
+                      });
+                  }}
+                  clickDownVote={() => {
+                    axiosAuthClient
+                      .post("/votes?postId=" + postId + "&vote=-1")
+                      .then((response: any) => {
+                        setVote(response.vote);
+                        setTotalVote(response.totalVote);
+                      });
+                  }}
+                />
               </div>
-            </Col>
-          </Row>
-          <h2>{titleValue}</h2>
-          {contentValue}
-        </Card>
-        <h2 style={{ color: "#000" }}>Bình luận</h2>
-        {isLogin && (
-          <>
-            <EditorNoToolBar
-              value={comment}
-              setValue={setComment}
-              placeholder="Viết câu trả lời hoặc bình luận của bạn tại đây ..."
-            />
-            <div
-              style={{
-                position: "relative",
-                marginTop: 10,
-                marginBottom: 80,
+              {thisPost?.createdBy?.id != null &&
+                userId == thisPost?.createdBy.id && (
+                  <div style={{ paddingRight: 12 }}>
+                    <Link href={"/post/update?postId=" + postId}>
+                      <EditIcon
+                        style={{ width: 40, height: 40 }}
+                        className="yellow"
+                      />
+                    </Link>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <DeleteIcon
+                      style={{ width: 40, height: 40 }}
+                      className="red"
+                      onClick={() => setOpenPostDialog(true)}
+                    />
+                    <Dialog
+                      open={openPostDialog}
+                      onClose={() => setOpenPostDialog(false)}
+                      aria-labelledby="alert-dialog-title"
+                      aria-describedby="alert-dialog-description"
+                    >
+                      <DialogTitle id="alert-dialog-title">
+                        {"Xoá bài viết?"}
+                      </DialogTitle>
+                      <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                          Bạn có thực sự muốn xoá bài viết này?
+                        </DialogContentText>
+                      </DialogContent>
+                      <DialogActions>
+                        <Button onClick={() => setOpenPostDialog(false)}>
+                          Huỷ bỏ
+                        </Button>
+                        <Button
+                          onClick={() =>
+                            axiosAuthClient
+                              .delete("posts?postId=" + postId)
+                              .then((res) =>
+                                router.push("../home?isDelete=true")
+                              )
+                              .catch((res) =>
+                                router.push("../home?isDelete=false")
+                              )
+                          }
+                          autoFocus
+                        >
+                          Xác nhận
+                        </Button>
+                      </DialogActions>
+                    </Dialog>
+                  </div>
+                )}
+            </div>
+          </Col>
+        </Row>
+        <h2>{titleValue}</h2>
+        {contentValue}
+      </Card>
+      <h2 style={{ color: "#000" }}>Bình luận</h2>
+      {isLogin && (
+        <>
+          <EditorNoToolBar
+            value={comment}
+            setValue={setComment}
+            placeholder="Viết câu trả lời hoặc bình luận của bạn tại đây ..."
+          />
+          <div
+            style={{
+              position: "relative",
+              marginTop: 10,
+              marginBottom: 80,
+            }}
+          >
+            <Button
+              variant="contained"
+              style={{ position: "absolute", right: 0 }}
+              onClick={() => {
+                if (
+                  comment == null ||
+                  comment.ops[0].insert.trim().length < 2 ||
+                  JSON.stringify(comment).length > 2000
+                ) {
+                  setErr("Comment 1 -> 1200 ký tự");
+                  return;
+                }
+                axiosAuthClient
+                  .post("/comments", {
+                    content: JSON.stringify(comment),
+                    parentId: null,
+                    postId: postId,
+                  })
+                  .then((response: any) => {
+                    axiosAuthClient
+                      .get("/comments/pub?postId=" + postId)
+                      .then((response: any) => {
+                        if (response.length > 0) {
+                          setComments(mapComment(response));
+                          console.log(response);
+                        }
+                      });
+                  })
+                  .catch((err) => {
+                    setErr(JSON.stringify(err));
+                  });
               }}
             >
-              <Button
-                variant="contained"
-                style={{ position: "absolute", right: 0 }}
-                onClick={() => {
-                  if (
-                    comment == null ||
-                    comment.ops[0].insert.trim().length < 2 ||
-                    JSON.stringify(comment).length > 2000
-                  ) {
-                    setErr("Comment 1 -> 1200 ký tự");
-                    return;
-                  }
-                  axiosAuthClient
-                    .post("/comments", {
-                      content: JSON.stringify(comment),
-                      parentId: null,
-                      postId: postId,
-                    })
-                    .then((response: any) => {
-                      axiosAuthClient
-                        .get("/comments/pub?postId=" + postId)
-                        .then((response: any) => {
-                          if (response.length > 0) {
-                            setComments(mapComment(response));
-                            console.log(response);
-                          }
-                        });
-                    })
-                    .catch((err) => {
-                      setErr(JSON.stringify(err));
-                    });
-                }}
-              >
-                Gửi
-              </Button>
-            </div>
-          </>
-        )}
-        {isLogin != null && !isLogin && (
-          <h4 style={{ color: "#000" }}>
-            Hãy <Link href={"/login"}>đăng nhập</Link> để bình luận nhé ^^
-          </h4>
-        )}
-        {comments != null &&
-          comments.map((x) => (
-            <Comment
-              key={x.id}
-              comment={x}
-              isLogin={isLogin}
-              setErr={setErr}
-              setComments={setComments}
-            />
-          ))}
-      </>
-    );
-  else return <></>;
+              Gửi
+            </Button>
+          </div>
+        </>
+      )}
+      {isLogin != null && !isLogin && (
+        <h4 style={{ color: "#000" }}>
+          Hãy <Link href={"/login"}>đăng nhập</Link> để bình luận nhé ^^
+        </h4>
+      )}
+      {comments != null &&
+        comments.map((x) => (
+          <Comment
+            key={x.id}
+            comment={x}
+            isLogin={isLogin}
+            setErr={setErr}
+            setComments={setComments}
+            myUserId={myId}
+          />
+        ))}
+    </>
+  );
 };
 
 export default Post;

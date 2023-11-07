@@ -47,10 +47,18 @@ const modules = {
 
 
 function EditorNoToolBar(props) {
-    return (<ReactQuill placeholder= {props.placeholder} style={{ background: '#fff', color: '#000' }} modules={modules} formats={formats} defaultValue={props.value} theme="snow" onChange={(content, delta, source, editor) => {
-        // props.setValue(new QuillDeltaToHtmlConverter(JSON.parse(JSON.stringify(editor.getContents())).ops, {}).convert())
-        props.setValue(editor.getContents())
-    }
+    return (
+    <ReactQuill 
+        placeholder= {props.placeholder} 
+        style={{ background: '#fff', color: '#000' }} 
+        modules={modules} formats={formats} 
+        defaultValue={props.value}
+        value={props.value} 
+        theme="snow" 
+        onChange={(content, delta, source, editor) => {
+            // props.setValue(new QuillDeltaToHtmlConverter(JSON.parse(JSON.stringify(editor.getContents())).ops, {}).convert())
+            props.setValue(editor.getContents())
+        }
     } />)
 }
 

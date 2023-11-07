@@ -39,13 +39,15 @@ export default function CreatePost() {
       .post("/posts/pub/search", { id: postId })
       .then((response: any) => {
         if (response.posts.length !== 1) {
+          router.push("../notFound=true");
           return;
         }
         const post = response.posts[0];
-        // if (post.createdBy.id != localStorage.getItem("id")) {
-        //   console.log(post.createdBy.id + " " + localStorage.getItem("id"));
-        //   return;
-        // }
+        if (post.createdBy.id != localStorage.getItem("id")) {
+          console.log(post.createdBy.id + " " + localStorage.getItem("id"));
+          router.push("../post?notPermission=true&postId=" + postId);
+          return;
+        }
         setId(post.id);
         try {
           setContentValue(JSON.parse(post.content));
@@ -60,7 +62,7 @@ export default function CreatePost() {
         const tags = post.tags.map((x) => x.name);
         setTagSelected(tags);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => router.push("../notFound=true"));
 
     axiosAuthClient
       .post("/tags/pub/search", {})

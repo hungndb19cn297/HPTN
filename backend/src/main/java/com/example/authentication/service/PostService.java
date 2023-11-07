@@ -41,15 +41,15 @@ public class PostService extends BaseService {
         Post post = postRepository.findById(requestDto.getId()).orElse(null);
         if (post == null)
             throw new ApiException(ErrorMessage.INVALID_ID);
-//        if (!Objects.equals(post.getCreatedBy(), userId))
-//            throw new ApiException(ErrorMessage.PERMISSION_DENIED);
+        if (!Objects.equals(post.getCreatedBy(), userId))
+            throw new ApiException(ErrorMessage.PERMISSION_DENIED);
         List<Integer> tags = tagRepository.getIdExisted(requestDto.getTagIds());
         if (tags.size() != requestDto.getTagIds().size())
             throw new ApiException(ErrorMessage.INVALID_TAG_ID);
         post.setTitle(requestDto.getTitle());
         post.setContent(requestDto.getContent());
         post.getPostTags().clear();
-//        post.setUpdatedBy(userId);
+        post.setUpdatedBy(userId);
         postRepository.save(post);
         postTagRepository.saveAll(requestDto.getTagIds().stream().map(tagId -> new PostTag(tagId, post)).toList());
         return post.getId();
@@ -83,5 +83,15 @@ public class PostService extends BaseService {
         response.setPageIndex(requestDto.getPageIndex());
         response.setPageSize(requestDto.getPageSize());
         return response;
+    }
+
+    public Integer deletePost(Integer postId, Integer userId) {
+        Post post = postRepository.findById(postId).orElse(null);
+        if (post == null)
+            throw new ApiException(ErrorMessage.INVALID_POST);
+        if (!Objects.equals(post.getCreatedBy(), userId))
+            throw new ApiException(ErrorMessage.PERMISSION_DENIED);
+        postRepository.delete(post);
+        return postId;
     }
 }

@@ -1,17 +1,25 @@
 import Link from "next/link";
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Card, Row, Col, Image, Badge, Container } from "react-bootstrap";
 import UserCard from "../app.card.user";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { Button } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
 import dynamic from "next/dynamic";
 import axiosAuthClient from "@/api/axiosClient";
 import { useSearchParams } from "next/navigation";
 import HTMLReactParser from "html-react-parser";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const EditorNoToolBar = dynamic(
   () => import("@/component/app.no.toolbar.editor.jsx"),
@@ -68,39 +76,32 @@ export default function Comment({
   isLogin,
   setErr,
   setComments,
+  myUserId,
 }: {
   comment: IComment;
   isLogin: any;
   setErr: any;
   setComments: any;
+  myUserId: any;
 }) {
   const searchParams = useSearchParams();
   const postId = searchParams.get("postId");
   const [value, setValue] = useState(null);
   const [isRepling, setIsRepling] = useState(false);
-  console.log(comment)
+  const [openCommentDialog, setOpenCommentDialog] = useState(false);
+  console.log(myUserId + " " + comment.createdBy + " " + isLogin);
+
   if (comment != null)
     return (
       <Card
         style={{
-          marginTop: 20,
+          marginTop: 16,
           backgroundColor: "hsl(0deg 0% 100%)",
           color: "#0a0a0a",
           border: "none",
         }}
       >
         <Row>
-          {/* <Col style={{ flex: 1, paddingRight: 0, display: 'block' }}>
-                    <div style={{ padding: '10px 0px 10px 10px' }}>
-                        <div>
-                            <div style={{ border: '1px solid #000', borderRadius: 8, display: 'inline-block', textAlign: 'center' }}>
-                                <KeyboardArrowUpIcon style={{ width: 40, height: 40, color: '#29b6f6' }} />
-                                <div style={{ fontSize: 20, fontWeight: 600, color: '#66bb6a', display: 'inline-block' }}>112323</div>
-                                <KeyboardArrowDownIcon style={{ width: 40, height: 40 }} />
-                            </div>
-                        </div>
-                    </div>
-                </Col> */}
           <Col style={{ display: !comment.parentId ? "none" : "block" }}>
             <div
               style={{ height: "100%", width: 10, backgroundColor: "#ccc" }}
@@ -136,6 +137,67 @@ export default function Comment({
                           Trả lời
                         </Button>
                       )}
+                      {myUserId == comment.createdBy && (
+                        <>
+                          <DeleteIcon
+                            style={{
+                              width: 40,
+                              height: 40,
+                              margin: "16px 120px 16px 16px",
+                              position: "absolute",
+                              top: 0,
+                              right: 0,
+                            }}
+                            className="red"
+                            onClick={() => setOpenCommentDialog(true)}
+                          />
+                          <Dialog
+                            open={openCommentDialog}
+                            onClose={() => setOpenCommentDialog(false)}
+                            aria-labelledby="alert-dialog-title"
+                            aria-describedby="alert-dialog-description"
+                          >
+                            <DialogTitle id="alert-dialog-title">
+                              "Xoá bình luận?"
+                            </DialogTitle>
+                            <DialogContent>
+                              <DialogContentText id="alert-dialog-description">
+                                Bạn có thực sự muốn xoá bình luận này?
+                              </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                              <Button
+                                onClick={() => setOpenCommentDialog(false)}
+                              >
+                                Huỷ bỏ
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  axiosAuthClient
+                                    .delete("/comments?id=" + comment.id)
+                                    .then((response: any) => {
+                                      axiosAuthClient
+                                        .get("/comments/pub?postId=" + postId)
+                                        .then((response: any) => {
+                                          if (response.length > 0) {
+                                            setComments(mapComment(response));
+                                            setOpenCommentDialog(false);
+                                          }
+                                        });
+                                    })
+                                    .catch((err) => {
+                                      console.log(err);
+                                      setOpenCommentDialog(false);
+                                    });
+                                }}
+                                autoFocus
+                              >
+                                Xác nhận
+                              </Button>
+                            </DialogActions>
+                          </Dialog>
+                        </>
+                      )}
                     </Col>
                   </Row>
 
@@ -154,7 +216,7 @@ export default function Comment({
                 <div style={{ position: "relative", marginTop: 10 }}>
                   <Button
                     variant="contained"
-                    style={{ position: "absolute", right: 0 }}
+                    style={{ position: "absolute", right: 0, marginTop: -5 }}
                     onClick={() => {
                       if (
                         value == null ||
@@ -176,12 +238,13 @@ export default function Comment({
                           postId: postId,
                         })
                         .then((response: any) => {
+                          setIsRepling(false)
+                          setValue('')
                           axiosAuthClient
                             .get("/comments/pub?postId=" + postId)
                             .then((response: any) => {
                               if (response.length > 0) {
                                 setComments(mapComment(response));
-                                console.log(response);
                               }
                             });
                         })
@@ -196,7 +259,7 @@ export default function Comment({
               </div>
               <Container
                 style={{
-                  padding: "20px 52px 52px 52px",
+                  padding: "0px 52px 16px 52px",
                   display: comment?.childrenComment != null ? "block" : "none",
                 }}
               >
@@ -207,6 +270,7 @@ export default function Comment({
                     isLogin={isLogin}
                     setErr={setErr}
                     setComments={setComments}
+                    myUserId={myUserId}
                   />
                 ))}
               </Container>

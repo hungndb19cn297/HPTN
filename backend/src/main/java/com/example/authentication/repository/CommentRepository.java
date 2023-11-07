@@ -1,7 +1,6 @@
 package com.example.authentication.repository;
 
 import com.example.authentication.entity.Comment;
-import com.example.authentication.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,4 +16,6 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
     List<Comment> findAllByPostIdOrderByCreatedAt(Integer postId);
 
     List<Comment> findAllByPostIdOrderById(Integer postId);
+
+    Comment findOneByCreatedByAndId(Integer userId, Integer commentId);
 }

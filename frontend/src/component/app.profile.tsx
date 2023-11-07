@@ -13,8 +13,10 @@ import { Button } from "@mui/material";
 import { Container } from "react-bootstrap";
 import { useEffect, useRef, useState } from "react";
 import axiosAuthClient from "@/api/axiosClient";
+import { useRouter } from "next/navigation";
 
 export default function ProfileBasic(props: any) {
+  const router = useRouter();
   const user = props.user;
   const myUserId = props.myUserId;
   const setAvatar = props.setAvatar;
@@ -48,7 +50,9 @@ export default function ProfileBasic(props: any) {
           axiosAuthClient
             .post("/users/avatar", formData, config)
             .then((response) => {
-              setAvatar(response)
+              console.log(response);
+              localStorage.setItem("avatar", response);
+              window.location.reload()
             })
             .catch((error) => console.log(error));
         }}
@@ -68,7 +72,7 @@ export default function ProfileBasic(props: any) {
                   alt="Generic placeholder image"
                   fluid
                   onClick={() => {
-                    inputFile.current.click();
+                    if (user?.id == myUserId) inputFile.current.click();
                   }}
                 />
               </div>
@@ -101,7 +105,7 @@ export default function ProfileBasic(props: any) {
                   )}
                   {user?.id == myUserId && myUserId != null && (
                     <div className="d-flex pt-1">
-                      <Button className="flex-grow-1" variant="contained">
+                      <Button className="flex-grow-1" variant="contained" onClick={() => router.push("/profile/update")}>
                         Cập nhật
                       </Button>
                     </div>

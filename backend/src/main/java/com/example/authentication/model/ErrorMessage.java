@@ -19,4 +19,6 @@ public class ErrorMessage {
     public static final String FILE_NOT_EXISTS = "FILE_NOT_EXISTS";
     public static final String FILE_NOT_READABLE = "FILE_NOT_READABLE";
     public static final String PERMISSION_DENIED = "PERMISSION_DENIED";
+    public static final String INVALID_OLD_PASSWORD = "INVALID_OLD_PASSWORD";
+    public static final String INVALID_EMAIL = "INVALID_EMAIL";
 }

@@ -21,5 +21,5 @@ public class CommentResponseDto {
     @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss", timezone="Asia/Jakarta")
     private Date createdAt;
     @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss", timezone="Asia/Jakarta")
-    private Date deleteAt;
+    private Date deletedAt;
 }
