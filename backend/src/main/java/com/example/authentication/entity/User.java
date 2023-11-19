@@ -15,7 +15,7 @@ import java.util.List;
 @Table(name = "users")
 public class User extends CRUEntity{
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer id;
     private String firstName;
     private String lastName;

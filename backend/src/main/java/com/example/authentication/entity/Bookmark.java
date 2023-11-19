@@ -12,7 +12,7 @@ import lombok.*;
 @Table(name = "bookmarks")
 public class Bookmark extends CRUEntity{
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne

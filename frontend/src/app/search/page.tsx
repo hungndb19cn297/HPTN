@@ -1,17 +1,20 @@
 "use client";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Home from "../page";
 import { useEffect, useRef, useState } from "react";
 import axiosAuthClient from "@/api/axiosClient";
-import { Autocomplete, Input, TextField } from "@mui/material";
+import { Autocomplete, Button, Input, TextField } from "@mui/material";
 
 export default function Search() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [key, setKey] = useState(searchParams.get("key"));
   const [tagId, setTagId] = useState(searchParams.get("tagIds")?.split(","));
   const [names, setNames] = useState([]);
   const [tagSelected, setTagSelected] = useState([]);
   const [allTag, setAllTag] = useState([]);
+  const [searchKey, setSearchKey] = useState(searchParams.get("key"));
+  const [searchTagIds, setSearchTagIds] = useState(searchParams.get("tagIds"));
 
   useEffect(() => {
     setKey(searchParams.get("key"));
@@ -35,17 +38,18 @@ export default function Search() {
 
   var timeoutTag = useRef();
   useEffect(() => {
-    clearTimeout(timeoutTag.current);
-    timeoutTag.current = setTimeout(
-      () =>
-        setTagId(
-          allTag
-            .filter((t) => tagSelected.includes(t.name))
-            .map((t) => t.id)
-        ),
-      1500
+    setSearchTagIds(
+      allTag.filter((t) => tagSelected.includes(t.name)).map((t) => t.id)
     );
-  }, [tagSelected])
+    // clearTimeout(timeoutTag.current);
+    // timeoutTag.current = setTimeout(
+    //   () =>
+    //     setTagId(
+    //       allTag.filter((t) => tagSelected.includes(t.name)).map((t) => t.id)
+    //     ),
+    //   1500
+    // );
+  }, [tagSelected]);
 
   var timeoutKey: string | number | NodeJS.Timeout | undefined;
   return (
@@ -61,10 +65,12 @@ export default function Search() {
             maxWidth: 1000,
           }}
           onChange={(x) => {
-            clearTimeout(timeoutKey);
-            timeoutKey = setTimeout(() => setKey(x.target.value), 1000);
+            setSearchKey(x.target.value);
+            // clearTimeout(timeoutKey);
+            // timeoutKey = setTimeout(() => setKey(x.target.value), 1000);
           }}
           placeholder="Tìm kiếm"
+          value={searchKey}
         ></Input>
         <Autocomplete
           getOptionDisabled={() => {
@@ -90,6 +96,19 @@ export default function Search() {
             <TextField {...params} variant="outlined" placeholder="Thẻ" />
           )}
         />
+        <div className="d-flex flex-row-reverse bd-highlight">
+          <Button
+            onClick={() =>
+              router.push(
+                "../search?key=" + searchKey + "&tagIds=" + searchTagIds
+              )
+            }
+            variant="contained"
+            style={{marginRight: 20}}
+          >
+            Tìm kiếm
+          </Button>
+        </div>
 
         <Home search={{ key: key, tagId: tagId }}></Home>
       </div>

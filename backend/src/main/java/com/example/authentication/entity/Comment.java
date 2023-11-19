@@ -14,7 +14,7 @@ import java.util.Date;
 @Table(name = "comments")
 public class Comment extends CRUEntity{
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer id;
     @Length(max = 2000)
     private String content;

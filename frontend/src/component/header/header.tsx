@@ -53,7 +53,7 @@ function Header() {
                 className={path === "/" ? "nav-link active" : "nav-link"}
                 style={{ color: "#fff", marginLeft: 10 }}
               >
-                Chia sẻ kiến thức
+                Trang chủ
               </Link>
             </Nav.Item>
             <Nav.Item>
@@ -76,7 +76,20 @@ function Header() {
                   }
                   style={{ color: "#fff", marginLeft: 10 }}
                 >
-                  Xem bài viết đã lưu
+                  Đã lưu
+                </Link>
+              </Nav.Item>
+            )}
+                        {fullName != "" && fullName != null && (
+              <Nav.Item>
+                <Link
+                  href="/post/follow"
+                  className={
+                    path === "/post/follow" ? "nav-link active" : "nav-link"
+                  }
+                  style={{ color: "#fff", marginLeft: 10 }}
+                >
+                  Đang theo dõi
                 </Link>
               </Nav.Item>
             )}
@@ -92,7 +105,7 @@ function Header() {
             >
               <FormControl
                 type="search"
-                placeholder="Search"
+                placeholder="Tìm kiếm"
                 className="mr-2"
                 aria-label="Search"
                 style={{ paddingRight: 30 }}
@@ -101,6 +114,7 @@ function Header() {
               <Button
                 variant="outline-primary"
                 style={{ position: "absolute", top: "0", right: "0" }}
+                onClick={() => router.push("/search?key=" + search)}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

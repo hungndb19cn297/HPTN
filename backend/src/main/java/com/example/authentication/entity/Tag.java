@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class Tag extends CRUEntity{
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer id;
     private String name;
 

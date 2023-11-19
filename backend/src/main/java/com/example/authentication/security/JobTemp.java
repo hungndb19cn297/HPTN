@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class JobTemp {
     @Autowired
     private UserRepository userRepository;
-    @Scheduled(fixedRate = 1000*120)
+    @Scheduled(fixedRate = 1000*60)
     public void scheduleTaskWithFixedRate() {
         userRepository.existsById(0);
     }

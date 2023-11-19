@@ -29,6 +29,8 @@ const EditorNoToolBar = dynamic(
 function mapComment(response: any) {
   return response.map((cmt) => {
     let contentCmt;
+    console.log(cmt);
+
     try {
       contentCmt = HTMLReactParser(
         new QuillDeltaToHtmlConverter(JSON.parse(cmt.content).ops, {}).convert()
@@ -41,6 +43,7 @@ function mapComment(response: any) {
       fullName: cmt.createdBy.firstName + " " + cmt.createdBy.lastName,
       createdBy: cmt.createdBy.id,
       createdAt: cmt.createdAt,
+      deletedAt: cmt.deletedAt,
       content: contentCmt ?? "",
       id: cmt.id,
       parentId: null,
@@ -62,6 +65,7 @@ function mapComment(response: any) {
           createdBy: rep.createdBy.id,
           createdAt: rep.createdAt,
           content: contentRep ?? "",
+          deletedAt: rep.deletedAt,
           id: rep.id,
           parentId: cmt.id,
           childrenComment: null,
@@ -89,7 +93,7 @@ export default function Comment({
   const [value, setValue] = useState(null);
   const [isRepling, setIsRepling] = useState(false);
   const [openCommentDialog, setOpenCommentDialog] = useState(false);
-  console.log(myUserId + " " + comment.createdBy + " " + isLogin);
+  console.log(comment);
 
   if (comment != null)
     return (
@@ -121,7 +125,7 @@ export default function Comment({
                       />
                     </Col>
                     <Col>
-                      {isLogin && (
+                      {comment?.deletedAt == null && isLogin && (
                         <Button
                           variant="outlined"
                           style={{
@@ -137,67 +141,68 @@ export default function Comment({
                           Trả lời
                         </Button>
                       )}
-                      {myUserId == comment.createdBy && (
-                        <>
-                          <DeleteIcon
-                            style={{
-                              width: 40,
-                              height: 40,
-                              margin: "16px 120px 16px 16px",
-                              position: "absolute",
-                              top: 0,
-                              right: 0,
-                            }}
-                            className="red"
-                            onClick={() => setOpenCommentDialog(true)}
-                          />
-                          <Dialog
-                            open={openCommentDialog}
-                            onClose={() => setOpenCommentDialog(false)}
-                            aria-labelledby="alert-dialog-title"
-                            aria-describedby="alert-dialog-description"
-                          >
-                            <DialogTitle id="alert-dialog-title">
-                              "Xoá bình luận?"
-                            </DialogTitle>
-                            <DialogContent>
-                              <DialogContentText id="alert-dialog-description">
-                                Bạn có thực sự muốn xoá bình luận này?
-                              </DialogContentText>
-                            </DialogContent>
-                            <DialogActions>
-                              <Button
-                                onClick={() => setOpenCommentDialog(false)}
-                              >
-                                Huỷ bỏ
-                              </Button>
-                              <Button
-                                onClick={() => {
-                                  axiosAuthClient
-                                    .delete("/comments?id=" + comment.id)
-                                    .then((response: any) => {
-                                      axiosAuthClient
-                                        .get("/comments/pub?postId=" + postId)
-                                        .then((response: any) => {
-                                          if (response.length > 0) {
-                                            setComments(mapComment(response));
-                                            setOpenCommentDialog(false);
-                                          }
-                                        });
-                                    })
-                                    .catch((err) => {
-                                      console.log(err);
-                                      setOpenCommentDialog(false);
-                                    });
-                                }}
-                                autoFocus
-                              >
-                                Xác nhận
-                              </Button>
-                            </DialogActions>
-                          </Dialog>
-                        </>
-                      )}
+                      {myUserId == comment.createdBy &&
+                        comment?.deletedAt == null && (
+                          <>
+                            <DeleteIcon
+                              style={{
+                                width: 40,
+                                height: 40,
+                                margin: "16px 120px 16px 16px",
+                                position: "absolute",
+                                top: 0,
+                                right: 0,
+                              }}
+                              className="red"
+                              onClick={() => setOpenCommentDialog(true)}
+                            />
+                            <Dialog
+                              open={openCommentDialog}
+                              onClose={() => setOpenCommentDialog(false)}
+                              aria-labelledby="alert-dialog-title"
+                              aria-describedby="alert-dialog-description"
+                            >
+                              <DialogTitle id="alert-dialog-title">
+                                Xoá bình luận?
+                              </DialogTitle>
+                              <DialogContent>
+                                <DialogContentText id="alert-dialog-description">
+                                  Bạn có thực sự muốn xoá bình luận này?
+                                </DialogContentText>
+                              </DialogContent>
+                              <DialogActions>
+                                <Button
+                                  onClick={() => setOpenCommentDialog(false)}
+                                >
+                                  Huỷ bỏ
+                                </Button>
+                                <Button
+                                  onClick={() => {
+                                    axiosAuthClient
+                                      .delete("/comments?id=" + comment.id)
+                                      .then((response: any) => {
+                                        axiosAuthClient
+                                          .get("/comments/pub?postId=" + postId)
+                                          .then((response: any) => {
+                                            if (response.length > 0) {
+                                              setComments(mapComment(response));
+                                              setOpenCommentDialog(false);
+                                            }
+                                          });
+                                      })
+                                      .catch((err) => {
+                                        console.log(err);
+                                        setOpenCommentDialog(false);
+                                      });
+                                  }}
+                                  autoFocus
+                                >
+                                  Xác nhận
+                                </Button>
+                              </DialogActions>
+                            </Dialog>
+                          </>
+                        )}
                     </Col>
                   </Row>
 
@@ -238,8 +243,8 @@ export default function Comment({
                           postId: postId,
                         })
                         .then((response: any) => {
-                          setIsRepling(false)
-                          setValue('')
+                          setIsRepling(false);
+                          setValue("");
                           axiosAuthClient
                             .get("/comments/pub?postId=" + postId)
                             .then((response: any) => {

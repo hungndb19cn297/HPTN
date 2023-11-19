@@ -12,7 +12,7 @@ import org.hibernate.validator.constraints.Length;
 @Table(name = "posts_tags")
 public class PostTag extends CRUEntity{
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne

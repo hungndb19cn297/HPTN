@@ -9,6 +9,7 @@ import com.example.authentication.exception.ApiException;
 import com.example.authentication.model.ErrorMessage;
 import com.example.authentication.utils.ConvertUtils;
 import com.example.authentication.utils.DateTimeUtils;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -46,7 +47,7 @@ public class CommentService extends BaseService {
         if (comments == null || comments.size() == 0)
             return new ArrayList<>();
 
-        Map<Integer, CommentResponseDto> responseDtoMap = new HashMap<>();
+        Map<Integer, CommentResponseDto> responseDtoMap = new TreeMap<>();
         for (Comment comment : comments) {
             CommentResponseDto tempC = new CommentResponseDto();
             if (comment.getDeletedAt() == null) {
@@ -75,11 +76,13 @@ public class CommentService extends BaseService {
         return responseDtos;
     }
 
+    @Transactional
     public Boolean deleteComment(Integer userId, Integer commentId){
         Comment comment = commentRepository.findOneByCreatedByAndId(userId, commentId);
         if (comment == null)
             throw new ApiException(ErrorMessage.INVALID_COMMENT);
         comment.setDeletedAt(new Date());
+        commentRepository.deleteAllByParentId(commentId);
         commentRepository.save(comment);
         return true;
     }

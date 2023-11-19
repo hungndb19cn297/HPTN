@@ -15,4 +15,5 @@ public class SearchPostDto extends PagingDto {
     private List<Integer> tagId;
     private Boolean isBookmark = false;
     private Integer createdBy;
+    private Boolean isFollow = false;
 }

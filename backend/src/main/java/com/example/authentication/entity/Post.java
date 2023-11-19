@@ -18,7 +18,7 @@ import java.util.List;
 @Table(name = "posts")
 public class Post extends CRUEntity{
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer id;
     private String title;
     @Length(max = 40000)

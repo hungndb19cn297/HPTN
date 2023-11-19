@@ -16,7 +16,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -57,21 +56,22 @@ public class PostService extends BaseService {
 
     public PostResponseDtoPage searchPost(SearchPostDto requestDto, Integer userId) {
         requestDto.validatePage();
-        if (requestDto.getIsBookmark() && userId == null)
+        if ((requestDto.getIsBookmark() || requestDto.getIsFollow()) && userId == null)
             throw new ApiException(ErrorMessage.PERMISSION_DENIED);
         Page<Post> postPage = postRepository.searchPost(requestDto.getId(),
                 requestDto.getKey(),
-                requestDto.getTagId() == null || requestDto.getTagId().isEmpty() ? new ArrayList<>(List.of(-1)) : requestDto.getTagId(),
+                requestDto.getTagId() == null || requestDto.getTagId().isEmpty() || requestDto.getTagId().get(0) == null ? new ArrayList<>(List.of(-1)) : requestDto.getTagId(),
                 requestDto.getIsBookmark(),
                 requestDto.getCreatedBy(),
                 userId,
+                requestDto.getIsFollow(),
                 PageRequest.of(requestDto.getPageIndex() - 1, requestDto.getPageSize(), Sort.by("createdAt").descending()));
 
         List<PostResponseDto> postDtos = postPage.toList().stream().map(dto -> {
             PostResponseDto postDto = ConvertUtils.convert(dto, PostResponseDto.class);
             postDto.setTags(ConvertUtils.convertList(dto.getPostTags().stream().map(PostTag::getTag).toList(), TagDto.class));
             postDto.setCreatedBy(ConvertUtils.convert(userRepository.findOneById(dto.getCreatedBy()),UseInfoDto.class));
-            postDto.setCommentCount(commentRepository.countByPostId(dto.getId()));
+            postDto.setCommentCount(commentRepository.countByPostIdAndDeletedAt(dto.getId(), null));
             postDto.setBookmarksCount(bookmarkRepository.countByPostId(dto.getId()));
             postDto.setVoteCount(voteRepository.getTotalVote(dto.getId()));
             return postDto;

@@ -11,7 +11,7 @@ import lombok.*;
 @Table(name = "follows")
 public class Follow extends CRUEntity{
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne
