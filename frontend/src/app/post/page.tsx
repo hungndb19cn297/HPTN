@@ -358,6 +358,7 @@ const Post = () => {
                     postId: postId,
                   })
                   .then((response: any) => {
+                    setComment("")
                     axiosAuthClient
                       .get("/comments/pub?postId=" + postId)
                       .then((response: any) => {

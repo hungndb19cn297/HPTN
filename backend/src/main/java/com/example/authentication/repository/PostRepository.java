@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -37,4 +38,37 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
                           PageRequest of);
 
     Integer countByCreatedBy(Integer userId);
+
+    @Query("""
+            Select p1 from Post p1 where p1.id in
+            (
+                Select p.id from Post p
+                left join p.bookmarks b
+                left join Vote v on p.id = v.postId
+                left join p.comments c
+                where (b.createdAt >= :startDate
+                or (v.createdAt >= :startDate and v.vote != 0)
+                or c.createdAt >= :startDate)
+                And p.deletedAt is null
+                And c.deletedAt is null
+            )
+            """)
+    List<Post> findPostByItemCreatedAt(Date startDate);
+
+    @Query("""
+            Select p1 from Post p1 where p1.id in
+            (
+                Select p.id from Post p
+                left join p.bookmarks b
+                left join Vote v on p.id = v.postId
+                left join p.comments c
+                where (b.createdAt >= :startDate
+                or v.createdAt >= :startDate
+                or c.createdAt >= :startDate
+                or p.createdAt >= :startDate)
+                And p.deletedAt is null
+                And c.deletedAt is null
+            )
+            """)
+    List<Post> findPostByCreatedAt(Date startDate);
 }

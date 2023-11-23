@@ -56,17 +56,19 @@ function Header() {
                 Trang chủ
               </Link>
             </Nav.Item>
-            <Nav.Item>
-              <Link
-                href="/post/create"
-                className={
-                  path === "/post/create" ? "nav-link active" : "nav-link"
-                }
-                style={{ color: "#fff", marginLeft: 10 }}
-              >
-                Đăng bài
-              </Link>
-            </Nav.Item>
+            {fullName != "" && fullName != null && (
+              <Nav.Item>
+                <Link
+                  href="/post/create"
+                  className={
+                    path === "/post/create" ? "nav-link active" : "nav-link"
+                  }
+                  style={{ color: "#fff", marginLeft: 10 }}
+                >
+                  Đăng bài
+                </Link>
+              </Nav.Item>
+            )}
             {fullName != "" && fullName != null && (
               <Nav.Item>
                 <Link
@@ -80,7 +82,7 @@ function Header() {
                 </Link>
               </Nav.Item>
             )}
-                        {fullName != "" && fullName != null && (
+            {fullName != "" && fullName != null && (
               <Nav.Item>
                 <Link
                   href="/post/follow"
@@ -90,6 +92,19 @@ function Header() {
                   style={{ color: "#fff", marginLeft: 10 }}
                 >
                   Đang theo dõi
+                </Link>
+              </Nav.Item>
+            )}
+            {fullName != "" && fullName != null && (
+              <Nav.Item>
+                <Link
+                  href="/report"
+                  className={
+                    path === "/report" ? "nav-link active" : "nav-link"
+                  }
+                  style={{ color: "#fff", marginLeft: 10 }}
+                >
+                  Thống kê
                 </Link>
               </Nav.Item>
             )}

@@ -25,14 +25,14 @@ const Principal = (props: {
           variant="outlined"
           style={{ marginLeft: 20, color: "#fff", borderColor: "#fff" }}
         >
-          Login
+          Đăng nhập
         </Button>
         <Button
           onClick={() => router.push("../signup")}
           variant="outlined"
           style={{ marginLeft: 10, color: "#fff", borderColor: "#fff" }}
         >
-          Signup
+          Đăng ký
         </Button>
       </Container>
     );
@@ -60,7 +60,7 @@ const Principal = (props: {
           variant="outlined"
           style={{ marginLeft: 10, color: "red", borderColor: "red" }}
         >
-          Logout
+          Đăng xuất
         </Button>
       </Container>
     );

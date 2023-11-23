@@ -1,5 +1,7 @@
 package com.example.authentication.utils;
 
+import com.example.authentication.model.PeriodReport;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -136,6 +138,25 @@ public class DateTimeUtils {
         if (d1.getTime() <= d2.getTime())
             return true;
         return false;
+    }
+
+    public static Date getDatePeriod(PeriodReport periodReport){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        switch (periodReport) {
+            case MONTHLY -> {
+                calendar.add(Calendar.MONTH, -1);
+                return calendar.getTime();
+            }
+            case DAILY -> {
+                calendar.add(Calendar.DAY_OF_MONTH, -1);
+                return calendar.getTime();
+            }
+            default -> {
+                calendar.add(Calendar.DAY_OF_MONTH, -7);
+                return calendar.getTime();
+            }
+        }
     }
 //
 //    public static Integer diffDate(Date date1, Date date2) {
