@@ -40,7 +40,7 @@ public class UserController {
         } catch (IOException e) {
             throw new ApiException(ErrorMessage.INVALID_FILE);
         }
-        return userService.setAvatar(userId, "https://kuroneko-it.me/api/images/pub/" + id);
+        return userService.setAvatar(userId, "http://localhost:8080/api/images/pub/" + id);
     }
 
     @PutMapping("info")

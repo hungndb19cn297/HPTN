@@ -10,9 +10,9 @@ import org.hibernate.validator.constraints.Length;
 @Setter
 public class UserUpdateInfoDto {
     @NotBlank(message = ErrorMessage.NOT_BLANK)
-    @Length(min = 4, max = 255, message = ErrorMessage.INVALID_LENGTH)
+    @Length(min = 1, max = 255, message = ErrorMessage.INVALID_LENGTH)
     private String firstName;
     @NotBlank(message = ErrorMessage.NOT_BLANK)
-    @Length(min = 4, max = 255, message = ErrorMessage.INVALID_LENGTH)
+    @Length(min = 1, max = 255, message = ErrorMessage.INVALID_LENGTH)
     private String lastName;
 }

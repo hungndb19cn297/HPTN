@@ -15,10 +15,10 @@ import org.hibernate.validator.constraints.Length;
 @NoArgsConstructor
 public class UserBaseDto {
     @NotBlank(message = ErrorMessage.NOT_BLANK)
-    @Length(min = 4, max = 255)
+    @Length(min = 1, max = 255)
     private String firstName;
     @NotBlank(message = ErrorMessage.NOT_BLANK)
-    @Length(min = 4, max = 255)
+    @Length(min = 1, max = 255)
     private String lastName;
     @NotBlank(message = ErrorMessage.NOT_BLANK)
     @Email(message = ErrorMessage.INVALID_EMAIL)

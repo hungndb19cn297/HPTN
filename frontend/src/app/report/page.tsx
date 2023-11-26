@@ -58,6 +58,7 @@ export default function Report() {
             followCount: x.followCount,
             user: x.user?.firstName + " " + x.user?.lastName,
             avatar: x.user?.avatar,
+            userId: x.user?.id
           };
         });
         setData(report);
@@ -105,6 +106,7 @@ export default function Report() {
                   followCount: x.followCount,
                   user: x.user?.firstName + " " + x.user?.lastName,
                   avatar: x.user?.avatar,
+                  userId: x.user?.id
                 };
               });
               setData(report);
@@ -162,6 +164,7 @@ export default function Report() {
                   followCount: x.followCount,
                   user: x.user?.firstName + " " + x.user?.lastName,
                   avatar: x.user?.avatar,
+                  userId: x.user?.id
                 };
               });
               setData(report);
@@ -253,7 +256,7 @@ export default function Report() {
                   {type == "USER" && (
                     <Link
                       style={{ textDecoration: "none" }}
-                      href={"../post?postId=" + row.id}
+                      href={"../profile?userId=" + row.userId}
                     >
                       <Image
                         src={row.avatar}
