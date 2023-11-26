@@ -55,4 +55,16 @@ public class UserService extends BaseService {
         userRepository.save(user);
         return true;
     }
+
+    public Integer blockUser(Integer id, Integer userId) {
+        User user = userRepository.findOneById(userId);
+        if (userId == null || !user.getIsAdmin())
+            throw new ApiException(ErrorMessage.PERMISSION_DENIED);
+        User userDelete = userRepository.findOneById(id);
+        if (userDelete == null)
+            throw new ApiException(ErrorMessage.INVALID_ID);
+        userDelete.setIsLocked(!userDelete.getIsLocked());
+        userRepository.save(userDelete);
+        return id;
+    }
 }

@@ -17,4 +17,6 @@ public interface TagRepository extends JpaRepository<Tag, Integer> {
 
     @Query("Select t from Tag t where :name is null or t.name like :name")
     Page<Tag> searchTag(String name, PageRequest of);
+
+    boolean existsByName(String tagName);
 }

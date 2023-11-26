@@ -56,4 +56,11 @@ public class UserController {
                 .getContext().getAuthentication().getPrincipal()).getId();
         return userService.updatePassword(userId, requestDto);
     }
+
+    @PatchMapping("block")
+    public Integer blockUser(@RequestParam Integer id){
+        Integer userId =((MyUserDetail) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal()).getId();
+        return userService.blockUser(id, userId);
+    }
 }
